@@ -1,0 +1,30 @@
+﻿@model List<ModuleViewModel>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+    <div class="text-center">
+        <h1 class="display-2">Homepage</h1>
+        <p></p>
+        @if (Model.Any())
+        {
+            <h4 class="display-4">Module List:</h4>
+            @foreach (var module in Model)
+            {
+    <div class="card mb-3">
+        <div class="card-body">
+                <form method="post" asp-action="ViewModule" asp-controller="Module" asp-route-id="@module.Id">
+                    <button type="submit" class="nav-link btn btn-link py-0" style="width:auto">
+                        @module.Title
+                    </button>
+                </form>
+            </div>
+        </div>
+            }
+        }
+                    else
+                    {
+                    <h3 class="display-1">You are not registered on any Modules</h3>
+                    }
+
+                </div>

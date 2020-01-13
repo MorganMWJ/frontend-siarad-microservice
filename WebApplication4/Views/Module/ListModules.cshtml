@@ -1,0 +1,58 @@
+﻿@model List<ModuleViewModel>
+
+@{ ViewBag.Title = "All Modules";
+}
+
+<h1>All Modules</h1>
+
+@if (Model.Any())
+{
+
+    <a class="btn btn-primary mb-3" style="width:auto" asp-action="CreateModule" asp-controller="Module">Add new module</a>
+    foreach (var module in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-header">
+                Module Code: @module.Code ----- ID: @module.Id ----- Year: @module.Year
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">Title: @module.Title<br />Coordinator: @module.CoordinatorUid<br />Campus: @module.ClassCode</h5>
+            </div>
+            <div class="card-footer">
+                <form asp-action="DeleteModule" asp-route-id="@module.Id" method="post">
+                    <a class="btn btn-primary" asp-action="EditModule" asp-controller="Module" asp-route-id="@module.Id">Edit</a>
+
+                    <span id="confirmDeleteSpan_@module.Id" style="display:none">
+                        <span>Are you sure you want to delete?</span>
+                        <button type="submit" class="btn btn-danger">Yes</button>
+                        <a class="btn btn-primary" onclick="confirmDelete('@module.Id', false)">No</a>
+                    </span>
+                    <span id="deleteSpan_@module.Id">
+                        <a class="btn btn-danger" onclick="confirmDelete('@module.Id', true)">Delete</a>
+                    </span>
+                </form>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="card">
+        <div class="card-header">
+            No modules created yet
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">
+                Use the button below to create a modules
+            </h5>
+            <a class="btn btn-primary" style="width:auto" asp-controller="Module" asp-action="CreateModule">
+                CreateModule
+            </a>
+        </div>
+    </div>
+
+}
+
+@section Scripts{
+    <script src="~/js/ConfirmDelete.js"></script>
+}
