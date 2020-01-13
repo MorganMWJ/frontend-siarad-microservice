@@ -1,0 +1,62 @@
+﻿@model ModuleViewModel
+
+@{
+    ViewBag.Title = "Edit Module";
+}
+
+<h1>Edit Module</h1>
+
+<form method="post" class="mt-3">
+    <div class="form-group row">
+        <label asp-for="Id" class="col-sm-2 col-form-label"></label>
+        <div class="col-sm-10">
+            <input asp-for="Id" disabled class="form-control">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label asp-for="Code" class="col-sm-2 col-form-label">Module Code: </label>
+        <div class="col-sm-10">
+            <input asp-for="Code" class="form-control">
+            <span asp-validation-for="Code" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label asp-for="Year" class="col-sm-2 col-form-label">Year: </label>
+        <div class="col-sm-10">
+            <input asp-for="Year" class="form-control">
+            <span asp-validation-for="Year" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label asp-for="ClassCode" class="col-sm-2 col-form-label">Campus Code: </label>
+        <div class="col-sm-10">
+            <input asp-for="ClassCode" class="form-control">
+            <span asp-validation-for="ClassCode" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label asp-for="CoordinatorUid" class="col-sm-2 col-form-label">Coordinator ID: </label>
+        <div class="col-sm-10">
+            <input asp-for="CoordinatorUid" class="form-control">
+            <span asp-validation-for="CoordinatorUid" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label asp-for="Title" class="col-sm-2 col-form-label">Module Title: </label>
+        <div class="col-sm-10">
+            <input asp-for="Title" class="form-control">
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group row">
+        <div class="col-sm-10">
+            <button type="submit" class="btn btn-primary">Update</button>
+            <a asp-action="ListModules" asp-controller="Module" class="btn btn-primary">Cancel</a>
+        </div>
+    </div>
+
+</form>
+

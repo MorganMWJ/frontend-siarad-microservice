@@ -15,9 +15,10 @@
         <div class="card-body">
                 <form method="post" asp-action="ViewModule" asp-controller="Module" asp-route-id="@module.Id">
                     <button type="submit" class="nav-link btn btn-link py-0" style="width:auto">
-                        @module.Title
+                        @module.Code: @module.Title
                     </button>
                 </form>
+            @*@<a href="@Url.Action("ViewModule","Module")">@module.Code: @module.Title</a>*@
             </div>
         </div>
             }

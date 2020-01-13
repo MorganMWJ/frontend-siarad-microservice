@@ -17,83 +17,51 @@ namespace WebApplication4.Controllers
     [Authorize(Roles = "Admin")]
     public class ModuleController : Controller
     {
+        private readonly IHttpClientFactory _factory;
+        public ModuleController(IHttpClientFactory factory)
+        {
+            _factory = factory;
+
+        }
+
+        [HttpGet]
+        public IActionResult ViewModule()
+        { 
+            return View();
+        }
         [AllowAnonymous]
         [HttpPost]
-        public IActionResult ViewModule(String id)
+        public async Task<IActionResult> ViewModule(String id)
         {
+            var client = _factory.CreateClient("ModuleClient");
+            HttpResponseMessage response = await client.GetAsync($"/api/modules/{id}");
 
-            var url = $"http://m56-docker1.dcs.aber.ac.uk:8100/api/modules/{id}";
-            WebRequest request = HttpWebRequest.Create(url);
-            WebResponse response;
-            try
+            ModuleViewModel model;
+            if (response.IsSuccessStatusCode)
             {
-                response = request.GetResponse();
+                string responseString = response.Content.ReadAsStringAsync().Result;
+                model = Newtonsoft.Json.JsonConvert.DeserializeObject<ModuleViewModel>(responseString);
             }
-            catch (WebException e)
+            else
             {
-                ViewBag.Error = "Error";
-                return View();
+                model = null;
             }
-            StreamReader sr = new StreamReader(response.GetResponseStream());
-            var sb = sr.ReadToEnd();
-
-            var stuff = Newtonsoft.Json.JsonConvert.DeserializeObject<ModuleViewModel>(sb);
-            Debug.WriteLine(stuff);
-            return View(stuff);
+            return View(model);
         }
-        public IActionResult ListModules()
+        public async Task<IActionResult> ListModules()
         {
             List<ModuleViewModel> moduleList = new List<ModuleViewModel>();
-            var url = $"http://m56-docker1.dcs.aber.ac.uk:8100/api/modules";
-            WebRequest request = HttpWebRequest.Create(url);
-            WebResponse response;
-            try
+            var client = _factory.CreateClient("ModuleClient");
+            HttpResponseMessage response = await client.GetAsync("/api/modules");
+            if (response.IsSuccessStatusCode)
             {
-                response = request.GetResponse();
+                string responseString = response.Content.ReadAsStringAsync().Result;
+                moduleList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ModuleViewModel>>(responseString);
             }
-            catch (WebException e)
-            {
-                return View(moduleList);
-            }
-            StreamReader sr = new StreamReader(response.GetResponseStream());
-            var sb = sr.ReadToEnd();
-            if (sb.Equals(""))
+            else
             {
                 return View(moduleList);
-            }
-            dynamic stuff = Newtonsoft.Json.JsonConvert.DeserializeObject(sb);
-            foreach (JObject root in stuff)
-            {
-                var module = new ModuleViewModel();
-                foreach (KeyValuePair<String, JToken> app in root)
-                {
-                    if (app.Key.Equals("id"))
-                    {
-                        module.Id = app.Value.ToString();
-                    }
-                    if (app.Key.Equals("code"))
-                    {
-                        module.Code = app.Value.ToString();
-                    }
-                    if (app.Key.Equals("classCode"))
-                    {
-                        module.ClassCode = app.Value.ToString();
-                    }
-                    if (app.Key.Equals("year"))
-                    {
-                        module.Year = app.Value.ToString();
-                    }
-                    if (app.Key.Equals("coordinatorUid"))
-                    {
-                        module.CoordinatorUid = app.Value.ToString();
-                    }
-                    if (app.Key.Equals("title"))
-                    {
-                        module.Title = app.Value.ToString();
-                    }
-                }
-                moduleList.Add(module);
-            }
+            } 
             return View(moduleList);
         }
 
@@ -105,18 +73,20 @@ namespace WebApplication4.Controllers
 
         //Source https://stackoverflow.com/questions/44676611/how-to-send-json-data-in-post-request-using-c-sharp
         [HttpPost]
-        public IActionResult CreateModule(ModuleViewModel model)
+        public async Task<IActionResult> CreateModule(ModuleViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var url = "http://m56-docker1.dcs.aber.ac.uk:8100/api/modules";
+                var client = _factory.CreateClient("ModuleClient");
+                //HttpResponseMessage response = await client.GetAsync("/api/modules");
+                /*var url = "http://m56-docker1.dcs.aber.ac.uk:8100/api/modules";
                 var request = WebRequest.Create(url);
                 request.ContentType = "application/json";
                 request.Method = "POST";
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;*/
 
-                using (var streamWriter = new StreamWriter(request.GetRequestStream()))
-                {
+                //using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+                /*{
                     //THIS FORMAT IS NEEDED
                     string json = new JavaScriptSerializer().Serialize(new
                     {
@@ -135,10 +105,23 @@ namespace WebApplication4.Controllers
                 catch (WebException e)
                 {
                     Debug.WriteLine(e.Message);
+                    return RedirectToAction("AccessDenied", "Account");
+                }*/
+
+                HttpResponseMessage response = await client.PostAsJsonAsync("/api/modules", model);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("ListModules", "Module");
                 }
+                else
+                {
+
+                    return View(response.Content);
+                }
+               
             }
 
-            return RedirectToAction("ListModules", "Module");
+            return View(model);
         }
 
         [HttpGet]
@@ -161,8 +144,72 @@ namespace WebApplication4.Controllers
             catch (WebException e)
             {
                 Debug.WriteLine(e.Message);
+                return RedirectToAction("AccessDenied", "Account");
             }
             return RedirectToAction("ListModules", "Module");
+        }
+
+        [HttpGet]
+        public IActionResult EditModule(string id)
+        {
+            var url = $"http://m56-docker1.dcs.aber.ac.uk:8100/api/modules/{id}";
+            WebRequest request = HttpWebRequest.Create(url);
+            WebResponse response;
+            try
+            {
+                response = request.GetResponse();
+            }
+            catch (WebException e)
+            {
+                Debug.WriteLine(e.Message);
+                return RedirectToAction("AccessDenied", "Account");
+            }
+            StreamReader sr = new StreamReader(response.GetResponseStream());
+            var sb = sr.ReadToEnd();
+
+            var model = Newtonsoft.Json.JsonConvert.DeserializeObject<ModuleViewModel>(sb);
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult EditModule(ModuleViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var url = $"http://m56-docker1.dcs.aber.ac.uk:8100/api/modules/{model.Id}";
+                var request = WebRequest.Create(url);
+                request.ContentType = "application/json";
+                request.Method = "PUT";
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+
+                using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+                {
+                    //THIS FORMAT IS NEEDED
+                    string json = new JavaScriptSerializer().Serialize(new
+                    {
+                        Id = model.Id,
+                        Code = model.Code,
+                        Year = model.Year,
+                        ClassCode = model.ClassCode,
+                        CoordinatorUid = model.CoordinatorUid,
+                        Title = model.Title
+                    });
+                    streamWriter.Write(json);
+                }
+                try
+                {
+                    var response = request.GetResponse();
+                }
+                catch (WebException e)
+                {
+                    Debug.WriteLine(e.Message);
+                    return RedirectToAction("AccessDenied", "Account");
+                }
+                return RedirectToAction("ListModules", "Module");
+            }
+
+            return View(model);
         }
     }
 }

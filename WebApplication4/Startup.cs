@@ -56,6 +56,25 @@ namespace WebApplication4
             }).AddXmlSerializerFormatters();
 
             services.AddScoped<Services.IAuthenticationService, LdapAuthService>();
+
+            services.AddHttpClient("ModuleClient", client =>
+            {
+                client.BaseAddress = new Uri($"http://m56-docker1.dcs.aber.ac.uk:8100");
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+            services.AddHttpClient("SettingsClient", client =>
+            {
+                client.BaseAddress = new Uri($"http://m56-docker1.dcs.aber.ac.uk:8100");
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+            services.AddHttpClient("HomeClient", client =>
+            {
+                client.BaseAddress = new Uri($"http://m56-docker1.dcs.aber.ac.uk:8100");
+                client.DefaultRequestHeaders.Clear();
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

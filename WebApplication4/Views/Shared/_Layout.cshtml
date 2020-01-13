@@ -53,6 +53,13 @@
                     <ul class="navbar-nav ml-auto">
                         @if (signInManager.IsSignedIn(User))
                         {
+                            <li class="nav-item">
+                                <form method="post" asp-action="EditSettings" asp-controller="Settings">
+                                    <button type="submit" class="nav-link btn btn-link py-0" style="width:auto">
+                                        Settings
+                                    </button>
+                                </form>
+                            </li>
                             //Post method over get to avoid malicious activity
                             <li class="nav-item">
                                 <form method="post" asp-action="Logout" asp-controller="Account">
@@ -75,6 +82,10 @@
                 </div>
             </div>
         </nav>
+        @*<div class="ml-auto">
+            <label class="form-check-label" asp-for="@">           
+            </label>
+        </div>*@
     </header>
     <div class="container">
         <partial name="_CookieConsentPartial" />

@@ -17,20 +17,26 @@ namespace WebApplication4.Controllers
     {
         public IActionResult Index()
         {
+            var url = "";
+            WebRequest request;
+            WebResponse response;
             List<ModuleViewModel> moduleList = new List<ModuleViewModel>();
             if (User.IsInRole("Admin")) //Admin view
             {
-                return View(moduleList);
+                url = "http://m56-docker1.dcs.aber.ac.uk:8100/api/modules";
+                request = HttpWebRequest.Create(url);
             }
-            if (User.IsInRole("Staff")) //Staff view
+            else if (User.IsInRole("Student") || User.IsInRole("Staff"))
             {
-                return View(moduleList);
+                var name = User.Identity.Name;
+                var year = DateTime.Now.Year.ToString();
+                url = $"http://m56-docker1.dcs.aber.ac.uk:8100/api/modules/year/{year}/{name}";
+                request = HttpWebRequest.Create(url);
             }
-            var name = User.Identity.Name;
-            var year = DateTime.Now.Year.ToString();
-            var url = $"http://m56-docker1.dcs.aber.ac.uk:8100/api/modules/year/{year}/{name}";
-            WebRequest request = HttpWebRequest.Create(url);
-            WebResponse response;
+            else
+            {
+                request = HttpWebRequest.Create("http://m56-docker1.dcs.aber.ac.uk:8100/api/modules");
+            }
             try
             {
                 response = request.GetResponse();
