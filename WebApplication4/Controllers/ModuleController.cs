@@ -71,43 +71,12 @@ namespace WebApplication4.Controllers
             return View();
         }
 
-        //Source https://stackoverflow.com/questions/44676611/how-to-send-json-data-in-post-request-using-c-sharp
         [HttpPost]
         public async Task<IActionResult> CreateModule(ModuleViewModel model)
         {
             if (ModelState.IsValid)
             {
                 var client = _factory.CreateClient("ModuleClient");
-                //HttpResponseMessage response = await client.GetAsync("/api/modules");
-                /*var url = "http://m56-docker1.dcs.aber.ac.uk:8100/api/modules";
-                var request = WebRequest.Create(url);
-                request.ContentType = "application/json";
-                request.Method = "POST";
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;*/
-
-                //using (var streamWriter = new StreamWriter(request.GetRequestStream()))
-                /*{
-                    //THIS FORMAT IS NEEDED
-                    string json = new JavaScriptSerializer().Serialize(new
-                    {
-                        Code = model.Code,
-                        Year = model.Year,
-                        ClassCode = model.ClassCode,
-                        CoordinatorUid = model.CoordinatorUid,
-                        Title = model.Title
-                    });
-                    streamWriter.Write(json);
-                }
-                try
-                {
-                    var response = request.GetResponse();
-                }
-                catch (WebException e)
-                {
-                    Debug.WriteLine(e.Message);
-                    return RedirectToAction("AccessDenied", "Account");
-                }*/
-
                 HttpResponseMessage response = await client.PostAsJsonAsync("/api/modules", model);
                 if (response.IsSuccessStatusCode)
                 {
@@ -131,85 +100,132 @@ namespace WebApplication4.Controllers
         }
 
         [HttpPost]
-        public IActionResult DeleteModule(string id)
+        public async Task<IActionResult> DeleteModule(string id)
         {
-            var url = $"http://m56-docker1.dcs.aber.ac.uk:8100/api/modules/{id}";
-            var request = WebRequest.Create(url);
-            request.Method = "DELETE";
-            WebResponse response;
-            try
+            var client = _factory.CreateClient("ModuleClient");
+            HttpResponseMessage response = await client.DeleteAsync($"/api/modules/{id}");
+            if (response.IsSuccessStatusCode)
             {
-                response = request.GetResponse();
+                return RedirectToAction("ListModules", "Module");
             }
-            catch (WebException e)
+            else
             {
-                Debug.WriteLine(e.Message);
-                return RedirectToAction("AccessDenied", "Account");
+
+                return View(response.Content);
             }
-            return RedirectToAction("ListModules", "Module");
         }
 
         [HttpGet]
-        public IActionResult EditModule(string id)
+        public async Task<IActionResult> EditModule(string id)
         {
-            var url = $"http://m56-docker1.dcs.aber.ac.uk:8100/api/modules/{id}";
-            WebRequest request = HttpWebRequest.Create(url);
-            WebResponse response;
-            try
+            var client = _factory.CreateClient("ModuleClient");
+            HttpResponseMessage response = await client.GetAsync($"/api/modules/{id}");
+            ModuleViewModel model;
+            if (response.IsSuccessStatusCode)
             {
-                response = request.GetResponse();
+                string responseString = response.Content.ReadAsStringAsync().Result;
+                model = Newtonsoft.Json.JsonConvert.DeserializeObject<ModuleViewModel>(responseString);
             }
-            catch (WebException e)
+            else
             {
-                Debug.WriteLine(e.Message);
-                return RedirectToAction("AccessDenied", "Account");
+                model = null;
             }
-            StreamReader sr = new StreamReader(response.GetResponseStream());
-            var sb = sr.ReadToEnd();
-
-            var model = Newtonsoft.Json.JsonConvert.DeserializeObject<ModuleViewModel>(sb);
-
             return View(model);
         }
 
         [HttpPost]
-        public IActionResult EditModule(ModuleViewModel model)
+        public async Task<IActionResult> EditModule(ModuleViewModel model)
         {
             if (ModelState.IsValid)
             {
-                var url = $"http://m56-docker1.dcs.aber.ac.uk:8100/api/modules/{model.Id}";
-                var request = WebRequest.Create(url);
-                request.ContentType = "application/json";
-                request.Method = "PUT";
-                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
+                var client = _factory.CreateClient("ModuleClient");
+                HttpResponseMessage response = await client.PutAsJsonAsync($"/api/modules/{model.Id}", model);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("ListModules", "Module");
+                }
+                else
+                {
 
-                using (var streamWriter = new StreamWriter(request.GetRequestStream()))
-                {
-                    //THIS FORMAT IS NEEDED
-                    string json = new JavaScriptSerializer().Serialize(new
-                    {
-                        Id = model.Id,
-                        Code = model.Code,
-                        Year = model.Year,
-                        ClassCode = model.ClassCode,
-                        CoordinatorUid = model.CoordinatorUid,
-                        Title = model.Title
-                    });
-                    streamWriter.Write(json);
-                }
-                try
-                {
-                    var response = request.GetResponse();
-                }
-                catch (WebException e)
-                {
-                    Debug.WriteLine(e.Message);
-                    return RedirectToAction("AccessDenied", "Account");
-                }
-                return RedirectToAction("ListModules", "Module");
+                    return View(response.Content);
+                }   
             }
-
             return View(model);
+        }
+
+        public IActionResult FileUpload()
+        {
+            return View(new FileUploadModel());
+        }
+
+        //source https://stackoverflow.com/questions/39397278/post-files-from-asp-net-core-web-api-to-another-asp-net-core-web-api
+        [HttpPost]
+        public async Task<IActionResult> FileUpload(FileUploadModel model)
+        {
+
+            if (ModelState.IsValid)
+            {
+                //Getting file meta data
+                var client = _factory.CreateClient("ModuleClient");
+
+                byte[] data;
+                using (var br = new BinaryReader(model.UploadModule.OpenReadStream()))
+                    data = br.ReadBytes((int)model.UploadModule.OpenReadStream().Length);
+
+                ByteArrayContent bytes = new ByteArrayContent(data);
+
+
+                MultipartFormDataContent multiContent = new MultipartFormDataContent();
+
+                multiContent.Add(bytes, "file", model.UploadModule.FileName);
+                HttpResponseMessage response = await client.PostAsync($"/api/data/modules", multiContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+
+                }
+
+
+                using (var br = new BinaryReader(model.UploadStudentModule.OpenReadStream()))
+                    data = br.ReadBytes((int)model.UploadStudentModule.OpenReadStream().Length);
+
+                bytes = new ByteArrayContent(data);
+
+
+                multiContent = new MultipartFormDataContent();
+
+                multiContent.Add(bytes, "file", model.UploadStudentModule.FileName);
+                response = await client.PostAsync($"/api/data/students/{model.CampusCode}", multiContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+
+                }
+
+
+
+                using (var br = new BinaryReader(model.UploadStaff.OpenReadStream()))
+                    data = br.ReadBytes((int)model.UploadStaff.OpenReadStream().Length);
+
+                bytes = new ByteArrayContent(data);
+
+
+                multiContent = new MultipartFormDataContent();
+
+                multiContent.Add(bytes, "file", model.UploadStaff.FileName);
+                response = await client.PostAsync($"/api/data/staff/{model.CampusCode}/{model.Year}", multiContent);
+
+                if (response.IsSuccessStatusCode)
+                {
+
+                }
+
+
+                return RedirectToAction("Index", "Home");
+            }
+            return View(model);
+            // do something with the above data
+            // to do : return something
         }
     }
 }

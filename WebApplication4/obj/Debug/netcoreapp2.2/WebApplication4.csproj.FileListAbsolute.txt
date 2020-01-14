@@ -127,3 +127,4 @@ M:\FrontEnd\WebApplication4\obj\Debug\netcoreapp2.2\WebApplication4.csproj.CopyC
 M:\FrontEnd\WebApplication4\obj\Debug\netcoreapp2.2\Razor\Views\Module\EditModule.g.cshtml.cs
 M:\FrontEnd\WebApplication4\obj\Debug\netcoreapp2.2\Razor\Views\Administration\ManageUserRoles.g.cshtml.cs
 M:\FrontEnd\WebApplication4\obj\Debug\netcoreapp2.2\Razor\Views\Settings\EditSettings.g.cshtml.cs
+M:\FrontEnd\WebApplication4\obj\Debug\netcoreapp2.2\Razor\Views\Module\FileUpload.g.cshtml.cs

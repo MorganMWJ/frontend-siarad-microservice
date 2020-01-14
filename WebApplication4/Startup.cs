@@ -65,13 +65,13 @@ namespace WebApplication4
             });
             services.AddHttpClient("SettingsClient", client =>
             {
-                client.BaseAddress = new Uri($"http://m56-docker1.dcs.aber.ac.uk:8100");
+                client.BaseAddress = new Uri($"http://m56-docker1.dcs.aber.ac.uk:8200");
                 client.DefaultRequestHeaders.Clear();
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
             });
-            services.AddHttpClient("HomeClient", client =>
+            services.AddHttpClient("MessageClient", client =>
             {
-                client.BaseAddress = new Uri($"http://m56-docker1.dcs.aber.ac.uk:8100");
+                client.BaseAddress = new Uri($"http://m56-docker1.dcs.aber.ac.uk:8280");
                 client.DefaultRequestHeaders.Clear();
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
             });

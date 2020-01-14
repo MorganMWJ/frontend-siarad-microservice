@@ -54,7 +54,7 @@
                         @if (signInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">
-                                <form method="post" asp-action="EditSettings" asp-controller="Settings">
+                                <form method="get" asp-action="EditSettings" asp-controller="Settings" asp-route-id="@User.Identity.Name">
                                     <button type="submit" class="nav-link btn btn-link py-0" style="width:auto">
                                         Settings
                                     </button>

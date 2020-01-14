@@ -12,33 +12,67 @@ namespace WebApplication4.Controllers
 {
     public class SettingsController : Controller
     {
+        private readonly IHttpClientFactory _factory;
+        public SettingsController(IHttpClientFactory factory)
+        {
+            _factory = factory;
+
+        }
 
         [HttpGet]
-        public IActionResult EditSettings()
+        public async Task<IActionResult> EditSettings(String id)
         {
-            var url = $"http://m56-docker1.dcs.aber.ac.uk:8200/api/notifications/{User.Identity.Name}";
-            WebRequest request = HttpWebRequest.Create(url);
-            WebResponse response;
-            try
+            var model = new NotificationModelViewModel
             {
-                response = request.GetResponse();
-            }
-            catch (WebException e)
+                Uid = id,
+                Daily = true,
+                Mentions = true,
+                Replies = false,
+                NotificationInterval = 1,
+                LastUpdated = DateTime.Now
+            };
+            var client = _factory.CreateClient("SettingsClient");
+            HttpResponseMessage response = await client.GetAsync($"/api/usernotifications/{id}");
+            if(response.StatusCode == HttpStatusCode.NotFound)
+            {  
+                response = await client.PostAsJsonAsync("/api/usernotifications", model);
+                if (response.IsSuccessStatusCode)
+                {
+                    return View(model);
+                }
+                else
+                {
+                    return View(response.Content);
+                }
+            }else if (response.IsSuccessStatusCode)
             {
-                ViewBag.Error = "Error";
-                return View();
+                string responseString = response.Content.ReadAsStringAsync().Result;
+                model = Newtonsoft.Json.JsonConvert.DeserializeObject<NotificationModelViewModel>(responseString);
             }
-            StreamReader sr = new StreamReader(response.GetResponseStream());
-            var sb = sr.ReadToEnd();
 
-            var model = Newtonsoft.Json.JsonConvert.DeserializeObject<NotificationModelViewModel>(sb);
             return View(model);
         }
 
-        //[HttpPost]
-       /* public IActionResult EditSettings(NotificationModelViewModel model)
+        [HttpPost]
+        public async Task<IActionResult> EditSettings(NotificationModelViewModel model)
         {
+            model.Uid = User.Identity.Name;
+            if (ModelState.IsValid)
+            {
+                var client = _factory.CreateClient("SettingsClient");
+                model.LastUpdated = DateTime.Now;
+                HttpResponseMessage response = await client.PutAsJsonAsync($"/api/usernotifications/{model.Uid}", model);
+                if (response.IsSuccessStatusCode)
+                {
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
 
-        }*/
+                    return View(response.Content);
+                }
+            }
+            return View(model);
+        }
     }
 }
