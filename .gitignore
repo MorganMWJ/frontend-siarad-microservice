@@ -8,10 +8,13 @@
 *.vpp.bak*
 *.vpp.vbak*
 
+<<<<<<< HEAD
 .vs/
 bin/
 obj/
 
+=======
+>>>>>>> ebd58e39d8e29e71e492dcf8f907f36906236320
 # User-specific files
 *.rsuser
 *.suo
@@ -39,7 +42,10 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+<<<<<<< HEAD
 */obj
+=======
+>>>>>>> ebd58e39d8e29e71e492dcf8f907f36906236320
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/

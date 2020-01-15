@@ -43,6 +43,5 @@ namespace WebApplication4.Models
         public List<string> Students { get; set; }
         [JsonIgnore]
         public List<string> Staff { get; set; }
-
     }
 }

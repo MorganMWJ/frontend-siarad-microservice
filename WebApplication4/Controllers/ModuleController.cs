@@ -25,6 +25,7 @@ namespace WebApplication4.Controllers
         private readonly IDataRepository _repo;
 
         public ModuleController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IHttpClientFactory factory, IDataRepository repo)
+
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
