@@ -23,6 +23,7 @@ namespace WebApplication4.Controllers
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IHttpClientFactory _factory;
         private readonly IDataRepository _repo;
+
         public ModuleController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IHttpClientFactory factory, IDataRepository repo)
         {
             this.roleManager = roleManager;
@@ -30,12 +31,12 @@ namespace WebApplication4.Controllers
             _factory = factory;
             _repo = repo;
         }
-        [AllowAnonymous]
-        [HttpGet]
-        public IActionResult ViewModule()
-        { 
-            return View();
-        }
+        //[AllowAnonymous]
+        //[HttpGet]
+        //public IActionResult ViewModule()
+        //{ 
+        //    return View();
+        //}
 
         [AllowAnonymous]
         [HttpPost]

@@ -29,24 +29,27 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.ModuleId)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsPrivate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsPrivate)
+        @if (Model.IsPrivate)
+        {        
+            <dt class = "col-sm-2">
+                @Html.DisplayNameFor(model => model.IsPrivate)
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.IsPrivate)
+            </dd>
+            <dt class = "col-sm-2">
+                @Html.DisplayNameFor(model => model.Uid1)
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.Uid1)
+            </dd>
+            <dt class = "col-sm-2">
+                @Html.DisplayNameFor(model => model.Uid2)
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.Uid2)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Uid1)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Uid1)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Uid2)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Uid2)
-        </dd>
+        }
     </dl>
     
     <form asp-action="Delete">

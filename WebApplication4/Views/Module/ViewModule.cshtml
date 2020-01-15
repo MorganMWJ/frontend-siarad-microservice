@@ -25,19 +25,20 @@ else
             </div>
             <div class="card-body">
                 <p>@group.Description</p>
+            </div>          
+            <div class="card-footer d-flex justify-content-between" asp-controller="Groups" asp-action="Create" asp-route-id="@group.Id">
+                @if (group.IsPrivate)
+                {
+                    <span class="font-weight-bold">
+                        Private Group (@group.Uid1 &amp; @group.Uid2)
+                    </span>
+                }
+                else
+                {
+                    <span class="font-weight-bold">Public Group</span>
+                }
+                <a class="btn btn-danger" asp-controller="Groups" asp-action="Delete" asp-route-id="@group.Id">Delete Group</a>
             </div>
-            @if (group.IsPrivate)
-            {
-                <div class="card-footer">
-                    Private Group between users @group.Uid1 &amp; @group.Uid2
-                </div>
-            }
-            else
-            {
-                <div class="card-footer">
-                    Public Group
-                </div>
-            }
         </div>
     }
 
