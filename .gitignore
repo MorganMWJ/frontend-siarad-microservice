@@ -8,6 +8,10 @@
 *.vpp.bak*
 *.vpp.vbak*
 
+.vs/
+bin/
+obj/
+
 # User-specific files
 *.rsuser
 *.suo
