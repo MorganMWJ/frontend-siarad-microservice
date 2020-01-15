@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using WebApplication4.Models;
 
@@ -26,11 +28,13 @@ namespace WebApplication4.Controllers
     {
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly IHttpClientFactory _factory;
 
-        public AdministrationController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager)
+        public AdministrationController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IHttpClientFactory factory)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
+            _factory = factory;
         }
         [HttpGet]
         public IActionResult CreateRole()
@@ -252,7 +256,7 @@ namespace WebApplication4.Controllers
                 {
                     UserId = user.Id,
                     UserName = user.UserName,
-                };
+                };   
                 if (await userManager.IsInRoleAsync(user, role.Name))
                 {
                     userRoleViewModel.IsSelected = true;
@@ -270,6 +274,8 @@ namespace WebApplication4.Controllers
         public async Task<IActionResult> EditUsersInRole(List<UserRoleViewModel> model, string roleId)
         {
             var role = await roleManager.FindByIdAsync(roleId);
+            var client = _factory.CreateClient("ModuleClient");
+            
 
             if (role == null)
             {
@@ -280,15 +286,36 @@ namespace WebApplication4.Controllers
             for (int i = 0; i < model.Count; i++)
             {
                 var user = await userManager.FindByIdAsync(model[i].UserId);
-
+                var staffAndStudent = new StaffAndStudentModel
+                {
+                    Forename = user.Forename,
+                    Surname = user.Surname,
+                    Uid = user.UserName
+                };
                 IdentityResult result = null;
 
                 if (model[i].IsSelected && !(await userManager.IsInRoleAsync(user, role.Name)))
                 {
                     result = await userManager.AddToRoleAsync(user, role.Name);
+                    if (role.Name.Equals("Student"))
+                    {
+                        HttpResponseMessage response = await client.PostAsJsonAsync($"/api/students", staffAndStudent);
+                    }
+                    else if (role.Name.Equals("Staff"))
+                    {
+                        HttpResponseMessage response = await client.PostAsJsonAsync($"/api/staff", staffAndStudent);
+                    }
                 } else if (!model[i].IsSelected && await userManager.IsInRoleAsync(user, role.Name))
                 {
                     result = await userManager.RemoveFromRoleAsync(user, role.Name);
+                    if (role.Name.Equals("Student"))
+                    {
+                        HttpResponseMessage response = await client.DeleteAsync($"/api/students/{staffAndStudent.Uid}");
+                    }
+                    else if (role.Name.Equals("Staff"))
+                    {
+                        HttpResponseMessage response = await client.DeleteAsync($"/api/staff/{staffAndStudent.Uid}");
+                    }
                 }
                 else
                 {
@@ -314,7 +341,6 @@ namespace WebApplication4.Controllers
         public async Task<IActionResult> ManageUserRoles(string userId)
         {
             ViewBag.userId = userId;
-
             var user = await userManager.FindByIdAsync(userId);
 
             if (user == null)
@@ -348,7 +374,14 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public async Task<IActionResult> ManageUserRoles(List<UserRolesViewModel> model, string userId)
         {
+            var client = _factory.CreateClient("ModuleClient");
             var user = await userManager.FindByIdAsync(userId);
+            var staffAndStudent = new StaffAndStudentModel
+            {
+                Forename = user.Forename,
+                Surname = user.Surname,
+                Uid = user.UserName
+            };
 
             if(user == null)
             {
@@ -358,11 +391,40 @@ namespace WebApplication4.Controllers
 
             var roles = await userManager.GetRolesAsync(user);
             var result = await userManager.RemoveFromRolesAsync(user, roles);
+            foreach (var role in roles)
+            {
+                Debug.WriteLine("\n" + role + "\n");
+                if (role.Equals("Student"))
+                {
+                    HttpResponseMessage response = await client.DeleteAsync($"/api/students/{staffAndStudent.Uid}");
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        return View(response.Content);
+                    }
+                }
+                else if (role.Equals("Staff"))
+                {
+                    HttpResponseMessage response = await client.DeleteAsync($"/api/staff/{staffAndStudent.Uid}");
+                }
+            }
 
             if (!result.Succeeded)
             {
                 ModelState.AddModelError("", "Cannot remove user existing roles");
                 return View(model);
+            }
+            var roleModel = model.Where(x => x.IsSelected).Select(y => y.RoleName);
+            foreach (var roleTwo in roleModel)
+            {
+
+                if (roleTwo.Equals("Student"))
+                {
+                    HttpResponseMessage response = await client.PostAsJsonAsync($"/api/students", staffAndStudent);
+                }
+                if (roleTwo.Equals("Staff"))
+                {
+                    HttpResponseMessage response = await client.PostAsJsonAsync($"/api/staff", staffAndStudent);
+                }
             }
             result = await userManager.AddToRolesAsync(user, model.Where(x => x.IsSelected).Select(y => y.RoleName));
             if (!result.Succeeded)

@@ -53,7 +53,7 @@ namespace WebApplication4.Controllers
             }
             else
             {
-                return RedirectToAction("AccessDenied", "Administration");
+                return View(moduleList);
             }         
         }
 
