@@ -143,6 +143,8 @@ namespace WebApplication4.Migrations
 
                     b.Property<bool>("English");
 
+                    b.Property<string>("Forename");
+
                     b.Property<bool>("LockoutEnabled");
 
                     b.Property<DateTimeOffset?>("LockoutEnd");
@@ -160,6 +162,8 @@ namespace WebApplication4.Migrations
                     b.Property<bool>("PhoneNumberConfirmed");
 
                     b.Property<string>("SecurityStamp");
+
+                    b.Property<string>("Surname");
 
                     b.Property<bool>("TwoFactorEnabled");
 

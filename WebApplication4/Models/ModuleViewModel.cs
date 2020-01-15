@@ -36,5 +36,10 @@ namespace WebApplication4.Models
         [Required]
         [JsonProperty("title", Order = 6)]
         public string Title { get; set; }
+
+        [JsonIgnore]
+        public List<string> Students { get; set; }
+        [JsonIgnore]
+        public List<string> Staff { get; set; }
     }
 }

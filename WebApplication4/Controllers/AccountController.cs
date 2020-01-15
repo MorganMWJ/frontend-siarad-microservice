@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -59,8 +61,8 @@ namespace WebApplication4.Controllers
             //To prevent open redirect attacks, we verify the URL is local
             if (ModelState.IsValid)
             {
-                LdapAuthService ldap = new LdapAuthService();
-                ldap.Login(model.Username, model.Password);
+                //LdapAuthService ldap = new LdapAuthService();
+                //ldap.Login(model.Username, model.Password);
                 var result = await signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberMe, false);
                 if (result.Succeeded)
                 {
@@ -70,7 +72,7 @@ namespace WebApplication4.Controllers
                     }
                     else
                     {
-                        return RedirectToAction("index", "home");
+                        return RedirectToAction("Index", "Home");
                     }
                 }
 
@@ -83,20 +85,23 @@ namespace WebApplication4.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Username };
+                var user = new ApplicationUser { UserName = model.Username,
+                English = true,
+                Forename = model.Forename,
+                Surname = model.Surname};
                 var result = await userManager.CreateAsync(user, model.Password);
-
                 if (result.Succeeded)
                 {
-                    if(signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                    if (signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
                     {
+                        Debug.WriteLine("Should not reach here");
                         return RedirectToAction("ListUsers", "Administration");
                     }
                     await signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("index", "home");
+                    Debug.WriteLine("Should reach here");
+                    return RedirectToAction("Index", "Home");
                 }
 
                 foreach(var error in result.Errors)

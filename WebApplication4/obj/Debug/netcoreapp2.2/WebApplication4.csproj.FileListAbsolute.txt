@@ -128,3 +128,5 @@ M:\FrontEnd\WebApplication4\obj\Debug\netcoreapp2.2\Razor\Views\Module\EditModul
 M:\FrontEnd\WebApplication4\obj\Debug\netcoreapp2.2\Razor\Views\Administration\ManageUserRoles.g.cshtml.cs
 M:\FrontEnd\WebApplication4\obj\Debug\netcoreapp2.2\Razor\Views\Settings\EditSettings.g.cshtml.cs
 M:\FrontEnd\WebApplication4\obj\Debug\netcoreapp2.2\Razor\Views\Module\FileUpload.g.cshtml.cs
+M:\FrontEnd\WebApplication4\obj\Debug\netcoreapp2.2\Razor\Views\Module\ManageStudentsRegistered.g.cshtml.cs
+M:\FrontEnd\WebApplication4\obj\Debug\netcoreapp2.2\Razor\Views\Module\ManageStaffRegistered.g.cshtml.cs

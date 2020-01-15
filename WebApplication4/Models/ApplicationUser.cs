@@ -10,5 +10,7 @@ namespace WebApplication4.Models
     {
         public bool English { get; set; }
         //True = English, False = Welsh
+        public string Forename { get; set; }
+        public string Surname { get; set; }
     }
 }
