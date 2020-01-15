@@ -22,18 +22,13 @@ namespace WebApplication4.Controllers
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly IHttpClientFactory _factory;
-<<<<<<< HEAD
         private readonly IDataRepository _repo;
-        public ModuleController(IHttpClientFactory factory, IDataRepository repo)
-=======
-        public ModuleController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IHttpClientFactory factory)
->>>>>>> 701fe5cae709e34d7126e001a1368c484403d27c
+        public ModuleController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IHttpClientFactory factory, IDataRepository repo)
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
             _factory = factory;
             _repo = repo;
-
         }
         [AllowAnonymous]
         [HttpGet]

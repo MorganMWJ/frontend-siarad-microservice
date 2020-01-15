@@ -38,12 +38,11 @@ namespace WebApplication4.Models
         public string Title { get; set; }
 
         [JsonIgnore]
-<<<<<<< HEAD
         public List<Group> Groups { get; set; }
-=======
+        [JsonIgnore]
         public List<string> Students { get; set; }
         [JsonIgnore]
         public List<string> Staff { get; set; }
->>>>>>> 701fe5cae709e34d7126e001a1368c484403d27c
+
     }
 }
