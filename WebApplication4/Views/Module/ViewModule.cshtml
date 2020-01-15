@@ -7,14 +7,72 @@
 {
     <div class="text-center">
         <h1>Error connecting to server</h1>
-        </div>
-        }
-        else
-        {
-        <div class="text-center">
-            <h1>Module View</h1>
-            <p>This is in Module View: @Model.Code --- @Model.Title</p>
-        </div>
+    </div>
+}
+else
+{
+    <div class="text-center">
+        <h1>Module View (id: @Model.Id)</h1>
+        <p>This is in Module View: @Model.Code --- @Model.Title</p>
+    </div>
 
 
-        }
+    foreach (var group in Model.Groups)
+    {
+        <div class="card mb-3">
+            <div class="card-header">
+                Group Name: @group.Name
+            </div>
+            <div class="card-body">
+                <p>@group.Description</p>
+            </div>
+            @if (group.IsPrivate)
+            {
+                <div class="card-footer">
+                    Private Group between users @group.Uid1 &amp; @group.Uid2
+                </div>
+            }
+            else
+            {
+                <div class="card-footer">
+                    Public Group
+                </div>
+            }
+        </div>
+    }
+
+    @if (Model.Groups.Count == 0)
+    {
+        <div class="card">
+            <div class="card-header">
+                No groups yet
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">
+                    Use the button below to create a groups
+                </h5>
+                <a class="btn btn-primary" style="width:auto" asp-controller="Groups" asp-action="Create"  asp-route-module_id="@Model.Id">
+                    New Group
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <div class="card-header">
+                Add a new discussion group
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">
+                    Use the button below to create a groups
+                </h5>
+                <a class="btn btn-primary" style="width:auto" asp-controller="Groups" asp-action="Create" asp-route-module_id="@Model.Id">
+                    New Group
+                </a>
+            </div>
+        </div>
+    }
+}
+
+

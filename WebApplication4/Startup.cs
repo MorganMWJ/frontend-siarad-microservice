@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using WebApplication4.Data;
 using WebApplication4.Models;
 using WebApplication4.Services;
 
@@ -30,8 +31,8 @@ namespace WebApplication4
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {
-            services.AddEntityFrameworkNpgsql().AddDbContext<IdentityManagement>(option => option.UseNpgsql(Configuration.GetConnectionString("IdentityConnection")));
+        {            
+            services.AddEntityFrameworkNpgsql().AddDbContext<IdentityManagement>(option => option.UseNpgsql(Configuration.GetConnectionString("FrontendConnection")));
             services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
                 options.Password.RequiredLength = 3;
@@ -55,7 +56,12 @@ namespace WebApplication4
                 options.Filters.Add(new AuthorizeFilter(policy));
             }).AddXmlSerializerFormatters();
 
+            /*group database */
+            services.AddEntityFrameworkNpgsql().AddDbContext<FrontendContext>(option =>
+            option.UseNpgsql(Configuration.GetConnectionString("FrontendConnection")));
+
             services.AddScoped<Services.IAuthenticationService, LdapAuthService>();
+            services.AddScoped<IDataRepository, DataRepository>();
 
             services.AddHttpClient("ModuleClient", client =>
             {

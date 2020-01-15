@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "M:\\FrontEnd\\WebApplication4\\WebApplication4.csproj": {}
+    "M:\\Documents\\MY FILE STUCTURE\\Year 5\\frontend\\WebApplication4\\WebApplication4.csproj": {}
   },
   "projects": {
-    "M:\\FrontEnd\\WebApplication4\\WebApplication4.csproj": {
+    "M:\\Documents\\MY FILE STUCTURE\\Year 5\\frontend\\WebApplication4\\WebApplication4.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "M:\\FrontEnd\\WebApplication4\\WebApplication4.csproj",
+        "projectUniqueName": "M:\\Documents\\MY FILE STUCTURE\\Year 5\\frontend\\WebApplication4\\WebApplication4.csproj",
         "projectName": "WebApplication4",
-        "projectPath": "M:\\FrontEnd\\WebApplication4\\WebApplication4.csproj",
-        "packagesPath": "C:\\Users\\dop2\\.nuget\\packages\\",
-        "outputPath": "M:\\FrontEnd\\WebApplication4\\obj\\",
+        "projectPath": "M:\\Documents\\MY FILE STUCTURE\\Year 5\\frontend\\WebApplication4\\WebApplication4.csproj",
+        "packagesPath": "C:\\Users\\mwj7\\.nuget\\packages\\",
+        "outputPath": "M:\\Documents\\MY FILE STUCTURE\\Year 5\\frontend\\WebApplication4\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "\\\\homefs.imaps.aber.ac.uk\\dop2\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "\\\\homefs.imaps.aber.ac.uk\\mwj7\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [

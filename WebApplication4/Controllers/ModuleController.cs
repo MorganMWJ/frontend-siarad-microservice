@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using WebApplication4.Data;
 using WebApplication4.Models;
 
 namespace WebApplication4.Controllers
@@ -18,20 +19,23 @@ namespace WebApplication4.Controllers
     public class ModuleController : Controller
     {
         private readonly IHttpClientFactory _factory;
-        public ModuleController(IHttpClientFactory factory)
+        private readonly IDataRepository _repo;
+        public ModuleController(IHttpClientFactory factory, IDataRepository repo)
         {
             _factory = factory;
+            _repo = repo;
 
         }
-
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult ViewModule()
         { 
             return View();
         }
+
         [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> ViewModule(String id)
+        public async Task<IActionResult> ViewModule(int id)
         {
             var client = _factory.CreateClient("ModuleClient");
             HttpResponseMessage response = await client.GetAsync($"/api/modules/{id}");
@@ -46,6 +50,10 @@ namespace WebApplication4.Controllers
             {
                 model = null;
             }
+
+            List<Group> groupsForModule = await _repo.GroupListAsync(model.Id);
+            model.Groups = groupsForModule;
+
             return View(model);
         }
         public async Task<IActionResult> ListModules()
