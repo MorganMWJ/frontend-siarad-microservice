@@ -1,4 +1,0 @@
-C:\Users\Dominic\Documents\SiaradGroupProject\IdentityAndLdapTesting\WebApplication4\obj\Debug\netcoreapp3.1\WebApplication4.csprojAssemblyReference.cache
-C:\Users\Dominic\Documents\SiaradGroupProject\IdentityAndLdapTesting\WebApplication4\obj\Debug\netcoreapp3.1\WebApplication4.MvcApplicationPartsAssemblyInfo.cache
-C:\Users\Dominic\Documents\SiaradGroupProject\IdentityAndLdapTesting\WebApplication4\obj\Debug\netcoreapp3.1\WebApplication4.AssemblyInfoInputs.cache
-C:\Users\Dominic\Documents\SiaradGroupProject\IdentityAndLdapTesting\WebApplication4\obj\Debug\netcoreapp3.1\WebApplication4.AssemblyInfo.cs
