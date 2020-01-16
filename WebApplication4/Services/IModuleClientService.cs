@@ -10,5 +10,7 @@ namespace WebApplication4.Services
     {
         Task<ModuleViewModel> GetModuleAsync(int id);
         Task<List<ModuleViewModel>> GetModuleListAsync();
+
+        Task<List<StaffAndStudentModel>> GetUsersOnModuleListAsync(int id);
     }
 }

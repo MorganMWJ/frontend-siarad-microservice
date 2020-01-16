@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -51,6 +52,36 @@ namespace WebApplication4.Services
                 //error message?
             }
             return moduleList;
+        }
+
+        public async Task<List<StaffAndStudentModel>> GetUsersOnModuleListAsync(int id)
+        {
+            var client = _factory.CreateClient("ModuleClient");
+
+            HttpResponseMessage response = await client.GetAsync($"/api/modules/{id}/students");
+            List<StaffAndStudentModel> studentList = new List<StaffAndStudentModel>();
+            if (response.IsSuccessStatusCode)
+            {
+                string responseString = response.Content.ReadAsStringAsync().Result;
+                studentList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<StaffAndStudentModel>>(responseString);
+            }
+            else
+            {
+                Debug.WriteLine(response.Content);
+            }
+
+            //Get a list of staff on a specific module           
+
+            response = await client.GetAsync($"/api/modules/{id}/staff");
+            List<StaffAndStudentModel> staffList = new List<StaffAndStudentModel>();
+            if (response.IsSuccessStatusCode)
+            {
+                string responseString = response.Content.ReadAsStringAsync().Result;
+                staffList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<StaffAndStudentModel>>(responseString);
+            }
+
+            studentList.AddRange(staffList);
+            return studentList;
         }
     }
 }

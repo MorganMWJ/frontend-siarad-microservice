@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using WebApplication4.Models;
 
@@ -76,6 +78,7 @@ namespace WebApplication4.Services
             HttpResponseMessage response = await client.PutAsJsonAsync($"/MessageStore/api/messages/{message.Id}", message);
             if (!response.IsSuccessStatusCode)
             {
+                Debug.WriteLine(response.Content);
                 //error message
             }
         }
@@ -87,7 +90,31 @@ namespace WebApplication4.Services
             if (!response.IsSuccessStatusCode)
             {
                 //error message
-            }            
+            }
+            string str = response.Headers.Location.AbsoluteUri;
+        }
+
+        public async Task PostUserAssociation(int id, string uid)
+        {
+            var client = _factory.CreateClient("MessageClient");
+            HttpResponseMessage response = await client.PostAsync($"/MessageStore/api/messages/{id}/{uid}", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                //error message
+            }
+        }
+
+        public async Task PostUserAssociations(int id, string uidsCSV)
+        {
+            var client = _factory.CreateClient("MessageClient");
+            var content = new StringContent(uidsCSV, Encoding.UTF8, "application/json");//broken
+            HttpResponseMessage response = await client.PostAsync($"/MessageStore/api/messages/{id}", content);
+            if (!response.IsSuccessStatusCode)
+            {
+                //error message
+            }
         }
     }
+
+
 }

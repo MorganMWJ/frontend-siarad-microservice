@@ -15,5 +15,9 @@ namespace WebApplication4.Services
         Task PutUpdateMessageAsync(Message message);
 
         Task PostCreateMessageAsync(Message message);
+
+        Task PostUserAssociation(int id, string uid);
+
+        Task PostUserAssociations(int id, string uidsCSV);
     }
 }

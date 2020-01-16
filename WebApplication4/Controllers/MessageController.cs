@@ -45,14 +45,51 @@ namespace WebApplication4.Controllers
             message.MessageCollection = new List<Message>();
 
             await _messageClient.PostCreateMessageAsync(message);
+
+            /* Get group */
+            Group group = await _repo.GetGroupAsync(group_id);
+
+            /* Get Module */
+            ModuleViewModel module = await _moduleClient.GetModuleAsync(group.ModuleId);
+
+            /* Create associations for users in same group as message */
+            if (group.IsPrivate)
+            {
+                //create single association for uid1 & uid2
+                await _messageClient.PostUserAssociation(message.Id, group.Uid1);
+                await _messageClient.PostUserAssociation(message.Id, group.Uid2);
+            }
+            else
+            {
+                /* Get users on module */
+                List<StaffAndStudentModel> usrs = await _moduleClient.GetUsersOnModuleListAsync(module.Id);
+                if(usrs.Count > 0)
+                {
+                    /* Create associations for users */
+                    await _messageClient.PostUserAssociations(message.Id, getUids(usrs));
+                }
+            }
+
             return RedirectToAction("ListMessagesForGroup", new { group_id });
+        }
+
+        private string getUids(List<StaffAndStudentModel> usrs)
+        {
+            string res = "";
+            foreach (StaffAndStudentModel user in usrs)
+            {
+                res += user.Uid;
+                res += ",";
+            }
+            res = res.Remove(res.Length - 1);
+            return res;
         }
 
         public async Task<IActionResult> Edit(string body, int id, int group_id)
         {
             Message message = await _messageClient.GetMessageAsync(id);
             message.Body = body;
-            await _messageClient.PutUpdateMessageAsync(message);
+            await _messageClient.PutUpdateMessageAsync(message);       
             return RedirectToAction("ListMessagesForGroup", new { group_id });
         }
 
