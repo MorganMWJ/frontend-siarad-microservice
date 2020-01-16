@@ -10,16 +10,11 @@ namespace WebApplication4.Models
 {
     public class FileUploadModel
     {
-        [Required]
         public IFormFile UploadStudentModule { set; get; }
-        [Required]
         public IFormFile UploadStaff { set; get; }
-        [Required]
         public IFormFile UploadModule { set; get; }
 
-        [Required]
         public string CampusCode { get; set; }
-        [Required]
 
         public List<SelectListItem> CampusCodes { get; } = new List<SelectListItem>
     {
@@ -27,8 +22,37 @@ namespace WebApplication4.Models
         new SelectListItem { Value = "MU0", Text = "Mauritius" },
         new SelectListItem { Value = "EX1", Text = "External"  },
     };
-        [Range(1900,2099)]
-        [Required]
         public int Year { get; set; }
     }
+
+    //Custom validation
+    /*public class FileRequired : ValidationAttribute
+    {
+        public string _fileName { get; set; }
+        public FileRequired(string fileName)
+        {
+            _fileName = fileName;
+        }
+        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        {
+            var model = (FileUploadModel)validationContext.ObjectInstance;
+            if (_fileName.Equals("UploadStaff"))
+            {
+                if (model.UploadStaff == null)
+                {
+                    return new ValidationResult("CampusCode is required.");
+                }
+                return ValidationResult.Success;
+            }else if (_fileName.Equals("UploadStudent"))
+            {
+                if(model.UploadStudentModule == null)
+                {
+                    return new ValidationResult("CampusCode and Year is required.");
+                }
+                return ValidationResult.Success;
+            }
+            return new ValidationResult("Unknown Error.");
+            
+        }
+    }*/
 }
