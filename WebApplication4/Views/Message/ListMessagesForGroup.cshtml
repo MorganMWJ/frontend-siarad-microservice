@@ -1,0 +1,107 @@
+﻿@model Group
+@inject SignInManager<ApplicationUser> signInManager;
+@{
+    ViewBag.Title = "Group Messages";
+}
+@if (ViewBag.Error == "Error")
+{
+    <div class="text-center">
+        <h1>Error connecting to server</h1>
+    </div>
+}
+else
+{
+    <div class="container text-center">
+        <h1>Group Messages</h1>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm bg-light border-right-2">
+                <span class="h5">
+                    @Model.Module.Code - @Model.Module.Title
+                </span>
+            </div>
+            <div class="col-sm bg-light border-left-2">
+                <span class="h5">
+                    Group: @Model.Name <br />
+                    Desc: @Model.Description
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="container">
+        @foreach (var message in Model.Messages)
+        {
+            @if (message.IsDeleted == false)
+            {
+                <div class="row my-3 py-4 rounded bg-light border-bottom-5">
+                    <div class="col-sm-3 d-flex flex-column">
+                        @if (message.OwnerUid != null)
+                        {
+                            <span>User: @message.OwnerUid</span>
+                        }
+                        <span>Created At: @message.TimeCreated</span>
+                        <span>Edited At: @message.TimeEdited</span>
+                    </div>
+                    <div class="col-sm-9  border-left">
+                        <div class="float-right">
+
+                            @if (signInManager.IsSignedIn(User) && User.Identity.Name.Equals(message.OwnerUid))
+                            {
+                                <a class="btn btn-outline-info btn-sm" onclick="toggleEditMessage(@message.Id)">Edit</a>
+                            }
+                            @if ((signInManager.IsSignedIn(User) &&
+                             (User.IsInRole("Admin") || User.IsInRole("Staff"))) || (signInManager.IsSignedIn(User) && !message.HasReplies && User.Identity.Name.Equals(message.OwnerUid)))
+                            {
+                                <a class="btn btn-outline-danger btn-sm" asp-controller="Message" asp-action="Delete" asp-route-id="@message.Id" asp-route-group_id="@Model.Id">Mark Deleted</a>
+                            }
+                            <p class="text-center">@message.MessageCollection.Count Replies</p>
+                        </div>
+                        <span>@message.Body</span>
+                    </div>
+                </div>
+
+                <div class="row" id="edit_message_@message.Id" style="display: none">
+                    <div class="col-md-4">
+                        @using (Html.BeginForm("Edit", "Message"))
+                        {
+                            <div class="form-group">
+                                @*<label for="messageTextArea">Example textarea</label>*@
+                                <textarea class="form-control" name="body" id="messageTextArea" rows="5" placeholder="Type a message here..."></textarea>
+                            </div>
+                            <input type="hidden" name="id" value="@message.Id" />
+                            <input type="hidden" name="group_id" value="@Model.Id" />
+                            <input type="submit" value="Edit Message" />
+                        }
+
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <div class="col-md-6">
+                @using (Html.BeginForm("Create", "Message"))
+                {
+                    <div class="form-group">
+                        @*<label for="messageTextArea">Example textarea</label>*@
+                        <textarea class="form-control" name="body" id="messageTextArea" rows="5" placeholder="Type a message here..."></textarea>
+                    </div>
+                    <input type="hidden" name="group_id" value="@Model.Id" />
+                    <input type="submit" value="Send Message" />
+                }
+
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts{
+    <script src="~/js/ToggleEditMessage.js"></script>
+}

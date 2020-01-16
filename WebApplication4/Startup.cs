@@ -78,9 +78,14 @@ namespace WebApplication4
             services.AddHttpClient("MessageClient", client =>
             {
                 client.BaseAddress = new Uri($"http://m56-docker1.dcs.aber.ac.uk:8280");
+                //client.BaseAddress = new Uri("http://http://localhost:8080/");
                 client.DefaultRequestHeaders.Clear();
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
             });
+
+
+            services.AddScoped<IModuleClientService, ModuleClientService>();
+            services.AddScoped<IMessageClientService, MessageClientService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

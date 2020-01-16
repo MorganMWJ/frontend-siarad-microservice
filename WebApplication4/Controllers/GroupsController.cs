@@ -8,16 +8,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplication4.Data;
 using WebApplication4.Models;
+using WebApplication4.Services;
 
 namespace WebApplication4.Controllers
 {
     public class GroupsController : Controller
     {
+        private readonly IModuleClientService _moduleClient;
         private readonly IHttpClientFactory _factory;
-        private readonly IDataRepository _repo;
+        private readonly IDataRepository _repo;        
 
-        public GroupsController(IHttpClientFactory factory, IDataRepository repo)
+        public GroupsController(IModuleClientService moduleClient, IHttpClientFactory factory, IDataRepository repo)
         {
+            _moduleClient = moduleClient;
             _factory = factory;
             _repo = repo;
         }
@@ -42,22 +45,7 @@ namespace WebApplication4.Controllers
         // GET: Groups/Create
         public async Task<IActionResult> Create(int module_id)
         {
-            var client = _factory.CreateClient("ModuleClient");
-            HttpResponseMessage response = await client.GetAsync($"/api/modules/{module_id}");
-
-            ModuleViewModel model;
-            if (response.IsSuccessStatusCode)
-            {
-                string responseString = response.Content.ReadAsStringAsync().Result;
-                model = Newtonsoft.Json.JsonConvert.DeserializeObject<ModuleViewModel>(responseString);
-            }
-            else
-            {
-                model = null;
-            }
-            List<Group> groupsForModule = await _repo.GroupListAsync(model.Id);
-            model.Groups = groupsForModule;
-
+            ModuleViewModel model = await _moduleClient.GetModuleAsync(module_id);
             ViewBag.CurrentModule = model;
             return View();
         }
@@ -98,7 +86,7 @@ namespace WebApplication4.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,ModuleCode,IsPrivate,Uid1,Uid2")] Group @group)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,ModuleId,IsPrivate,Uid1,Uid2")] Group @group)
         {
             if (id != @group.Id)
             {
