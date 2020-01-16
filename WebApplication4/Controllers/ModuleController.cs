@@ -13,6 +13,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using WebApplication4.Data;
 using WebApplication4.Models;
+using WebApplication4.Services;
 
 namespace WebApplication4.Controllers
 {
@@ -21,16 +22,19 @@ namespace WebApplication4.Controllers
     {
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly IModuleClientService _moduleClient;
         private readonly IHttpClientFactory _factory;
         private readonly IDataRepository _repo;
 
-        public ModuleController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IHttpClientFactory factory, IDataRepository repo)
+        public ModuleController(RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, 
+            IHttpClientFactory factory, IModuleClientService moduleClient, IDataRepository repo)
 
         {
             this.roleManager = roleManager;
             this.userManager = userManager;
             _factory = factory;
             _repo = repo;
+            _moduleClient = moduleClient;
         }
         //[AllowAnonymous]
         //[HttpGet]
@@ -40,42 +44,16 @@ namespace WebApplication4.Controllers
         //}
 
         [AllowAnonymous]
-        [HttpPost]
         public async Task<IActionResult> ViewModule(int id)
         {
-            var client = _factory.CreateClient("ModuleClient");
-            HttpResponseMessage response = await client.GetAsync($"/api/modules/{id}");
-
-            ModuleViewModel model;
-            if (response.IsSuccessStatusCode)
-            {
-                string responseString = response.Content.ReadAsStringAsync().Result;
-                model = Newtonsoft.Json.JsonConvert.DeserializeObject<ModuleViewModel>(responseString);
-            }
-            else
-            {
-                model = null;
-            }
-
-            List<Group> groupsForModule = await _repo.GroupListAsync(model.Id);
-            model.Groups = groupsForModule;
-
-            return View(model);
+            ModuleViewModel module = await _moduleClient.GetModuleAsync(id);
+            List<Group> groupsForModule = await _repo.GroupListAsync(module.Id);
+            module.Groups = groupsForModule;
+            return View(module);
         }
         public async Task<IActionResult> ListModules()
         {
-            List<ModuleViewModel> moduleList = new List<ModuleViewModel>();
-            var client = _factory.CreateClient("ModuleClient");
-            HttpResponseMessage response = await client.GetAsync("/api/modules");
-            if (response.IsSuccessStatusCode)
-            {
-                string responseString = response.Content.ReadAsStringAsync().Result;
-                moduleList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ModuleViewModel>>(responseString);
-            }
-            else
-            {
-                return View(moduleList);
-            } 
+            List<ModuleViewModel> moduleList = await _moduleClient.GetModuleListAsync();
             return View(moduleList);
         }
 

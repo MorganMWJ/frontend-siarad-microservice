@@ -39,5 +39,8 @@ namespace WebApplication4.Models
         [NotMapped]
         public virtual ModuleViewModel Module { get; set; }
 
+        [NotMapped]
+        public virtual List<Message> Messages { get; set; }
+
     }
 }

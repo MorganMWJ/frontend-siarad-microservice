@@ -81,6 +81,10 @@ namespace WebApplication4
                 client.DefaultRequestHeaders.Clear();
                 client.DefaultRequestHeaders.Add("Accept", "application/json");
             });
+
+
+            services.AddScoped<IModuleClientService, ModuleClientService>();
+            services.AddScoped<IMessageClientService, MessageClientService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

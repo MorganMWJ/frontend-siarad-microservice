@@ -1,5 +1,5 @@
 ﻿@model ModuleViewModel
-
+@inject SignInManager<ApplicationUser> signInManager;
 @{
     ViewBag.Title = "Module View";
 }
@@ -21,11 +21,13 @@ else
     {
         <div class="card mb-3">
             <div class="card-header">
-                Group Name: @group.Name
+                <span class="h5 font-weight-bold">Group Name: 
+                    <a class="h5" asp-controller="Message" asp-action="ListMessagesForGroup" asp-route-group_id="@group.Id">@group.Name</a>
+                </span>
             </div>
             <div class="card-body">
                 <p>@group.Description</p>
-            </div>          
+            </div>
             <div class="card-footer d-flex justify-content-between" asp-controller="Groups" asp-action="Create" asp-route-id="@group.Id">
                 @if (group.IsPrivate)
                 {
@@ -37,37 +39,39 @@ else
                 {
                     <span class="font-weight-bold">Public Group</span>
                 }
-                <a class="btn btn-danger" asp-controller="Groups" asp-action="Delete" asp-route-id="@group.Id">Delete Group</a>
+                <div class="d-flex">
+                    @if (signInManager.IsSignedIn(User) && (User.IsInRole("Admin") || User.IsInRole("Staff")))
+                    {
+                        <a class="btn btn-info mr-1" asp-controller="Groups" asp-action="Edit" asp-route-id="@group.Id">Edit Group</a>
+                        <a class="btn btn-danger ml-2" asp-controller="Groups" asp-action="Delete" asp-route-id="@group.Id">Delete Group</a>
+                    }
+                </div>
             </div>
         </div>
     }
 
     @if (Model.Groups.Count == 0)
     {
+
         <div class="card">
-            <div class="card-header">
-                No groups yet
+            <div class="card-header d-flex justify-content-between">
+                <span class="h5">Add a new discussion group</span>
+                <a class="btn btn-primary" style="width:auto" asp-controller="Groups" asp-action="Create" asp-route-module_id="@Model.Id">
+                    New Group
+                </a>
             </div>
             <div class="card-body">
                 <h5 class="card-title">
-                    Use the button below to create a groups
+                    There are currently zero groups
                 </h5>
-                <a class="btn btn-primary" style="width:auto" asp-controller="Groups" asp-action="Create"  asp-route-module_id="@Model.Id">
-                    New Group
-                </a>
             </div>
         </div>
     }
     else
     {
         <div class="card">
-            <div class="card-header">
-                Add a new discussion group
-            </div>
-            <div class="card-body">
-                <h5 class="card-title">
-                    Use the button below to create a groups
-                </h5>
+            <div class="card-header d-flex justify-content-between">
+                <span class="h5">Add a new discussion group</span>
                 <a class="btn btn-primary" style="width:auto" asp-controller="Groups" asp-action="Create" asp-route-module_id="@Model.Id">
                     New Group
                 </a>
