@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication4.Data;
@@ -13,12 +14,14 @@ namespace WebApplication4.Controllers
         private readonly IModuleClientService _moduleClient;
         private readonly IMessageClientService _messageClient;
         private readonly IDataRepository _repo;
+        private readonly IHttpClientFactory _factory;
 
-        public MessageController(IModuleClientService moduleClient, IMessageClientService messageClient, IDataRepository repo)
+        public MessageController(IModuleClientService moduleClient, IMessageClientService messageClient, IDataRepository repo, IHttpClientFactory factory)
         {
             _moduleClient = moduleClient;
             _messageClient = messageClient;
             _repo = repo;
+            _factory = factory;
         }
 
         public async Task<IActionResult> ListMessagesForGroup(int group_id)
@@ -37,6 +40,41 @@ namespace WebApplication4.Controllers
                 {
                     return RedirectToAction("AccessDenied", "Account");
                 }
+            }
+            //Duplicate method from ModuleController serves as a suitable method for restricting URL insertion to navigate to unauthorised pages
+            var client = _factory.CreateClient("ModuleClient");
+            HttpResponseMessage response;
+            List<StaffAndStudentModel> staffAndStudentList = new List<StaffAndStudentModel>();
+            if (User.IsInRole("Student"))//If student
+            {
+                response = await client.GetAsync($"/api/modules/{group.ModuleId}/students"); //Get a list of students
+            }
+            else if (User.IsInRole("Staff")) //If staff
+            {
+                response = await client.GetAsync($"/api/modules/{group.ModuleId}/staff"); //Get a list of staff
+            }
+            else //If other
+            {
+                response = null; //Create null to catch later
+            }
+            try
+            {
+                if (response.IsSuccessStatusCode)//If successfully got data
+                {
+                    string responseString = response.Content.ReadAsStringAsync().Result;
+                    staffAndStudentList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<StaffAndStudentModel>>(responseString);//Deserialise as model
+
+                    var result = staffAndStudentList.Find(e => e.Uid.Equals(User.Identity.Name)); //Try to find the user within the list
+                    if (result == null) //If the user is not there
+                    {
+                        return RedirectToAction("AccessDenied", "Account"); //Access denied
+                    }
+                }
+            }
+            catch (NullReferenceException e) //Catch from earlier, if other user (No role assigned)
+            {
+                //This will only ever be called if the user is unauthorised.
+                return RedirectToAction("AccessDenied", "Account"); //Access denied
             }
 
             return View(group);
