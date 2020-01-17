@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -51,10 +52,37 @@ namespace WebApplication4.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,ModuleId,IsPrivate,Uid1,Uid2")] Group @group)
+        public async Task<IActionResult> Create(Group @group)
         {
+            @group.Uid1 = User.Identity.Name;
             if (ModelState.IsValid)
             {
+                if (@group.IsPrivate)
+                {
+                    var client = _factory.CreateClient("ModuleClient");
+                    List<StaffAndStudentModel> staffAndStudentList = new List<StaffAndStudentModel>();
+
+                    HttpResponseMessage response = await client.GetAsync($"/api/modules/{@group.ModuleId}/students"); //Get a list of students
+                    string responseString = response.Content.ReadAsStringAsync().Result;
+                    var listToInsert = Newtonsoft.Json.JsonConvert.DeserializeObject<List<StaffAndStudentModel>>(responseString);
+                    staffAndStudentList.AddRange(listToInsert);
+
+                    response = await client.GetAsync($"/api/modules/{@group.ModuleId}/staff"); //Get a list of staff
+                    responseString = response.Content.ReadAsStringAsync().Result;
+                    listToInsert = Newtonsoft.Json.JsonConvert.DeserializeObject<List<StaffAndStudentModel>>(responseString);
+                    staffAndStudentList.AddRange(listToInsert);
+
+                    var getStudent = staffAndStudentList.Find(e => e.Uid.Equals(@group.Uid2));
+
+                    if (getStudent == null)
+                    {
+                        ViewBag.ErrorMessage = $"{@group.Uid2} is not a member of {@group.Module} -> Because of an error with IsPrivate, please click the button below";
+                        ModuleViewModel model = await _moduleClient.GetModuleAsync(@group.ModuleId);
+                        ViewBag.CurrentModule = model;
+                        @group.IsPrivate = false;
+                        return View(@group);
+                    }
+                }
                 await _repo.CreateGroupAsync(@group);
                 return RedirectToAction("ViewModule", "Module", new { id = group.ModuleId });
             }

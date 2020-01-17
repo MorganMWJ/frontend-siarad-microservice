@@ -31,8 +31,7 @@
             </div>
             <div class="form-group private-uid-input" style="display: none">
                 <label asp-for="Uid1" class="control-label"></label>
-                <input asp-for="Uid1" class="form-control" />
-                <span asp-validation-for="Uid1" class="text-danger"></span>
+                <input value="@User.Identity.Name" disabled class="form-control">
             </div>
             <div class="form-group private-uid-input" style="display: none">
                 <label asp-for="Uid2" class="control-label"></label>
@@ -40,8 +39,9 @@
                 <span asp-validation-for="Uid2" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
+                <input type="submit" value="Create" class="btn btn-primary"/>
             </div>
+            <h4>@ViewBag.ErrorMessage</h4>
         </form>
     </div>
 </div>
