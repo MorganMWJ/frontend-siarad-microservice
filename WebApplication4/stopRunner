@@ -1,0 +1,3 @@
+#!/bin/sh
+docker stop fe-dop2
+docker rm fe-dop2
