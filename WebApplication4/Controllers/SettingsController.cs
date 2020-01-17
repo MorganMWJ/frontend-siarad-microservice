@@ -25,8 +25,8 @@ namespace WebApplication4.Controllers
             var model = new NotificationModelViewModel
             {
                 Uid = id,
-                Daily = true,
-                Mentions = true,
+                Daily = false,
+                Mentions = false,
                 Replies = false,
                 NotificationInterval = 1,
                 LastUpdated = DateTime.Now

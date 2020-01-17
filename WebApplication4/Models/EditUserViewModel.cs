@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -10,14 +11,16 @@ namespace WebApplication4.Models
     {
         public EditUserViewModel()
         {
-            Claims = new List<string>();
             Roles = new List<string>();
         }
-
+        [JsonIgnore]
         public string Id { get; set; }
-        [Required]
         public string UserName { get; set; }
-        public List<string> Claims { get; set; }
+        [Required]
+        public string Forename { get; set; }
+        [Required]
+        public string Surname { get; set; }
+        [JsonIgnore]
         public IList<string> Roles { get; set; }
 
     }

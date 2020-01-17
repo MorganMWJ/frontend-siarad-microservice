@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Nancy.Json;
@@ -333,57 +335,79 @@ namespace WebApplication4.Controllers
                 var client = _factory.CreateClient("ModuleClient");
 
                 byte[] data;
-                using (var br = new BinaryReader(model.UploadModule.OpenReadStream()))
-                    data = br.ReadBytes((int)model.UploadModule.OpenReadStream().Length);
+                ByteArrayContent bytes;
+                MultipartFormDataContent multiContent;
+                HttpResponseMessage response;
+                if (model.UploadStudentModule == null && model.UploadStaff == null && model.UploadModule == null)
+                {
+                    ViewBag.ErrorMessage = "Please upload a file";
+                    return View(model);
+                }
+                if (model.UploadModule != null)
+                {
+                    
+                    using (var br = new BinaryReader(model.UploadModule.OpenReadStream()))
+                        data = br.ReadBytes((int)model.UploadModule.OpenReadStream().Length);
 
-                ByteArrayContent bytes = new ByteArrayContent(data);
+                     bytes = new ByteArrayContent(data);
 
 
-                MultipartFormDataContent multiContent = new MultipartFormDataContent();
+                    multiContent = new MultipartFormDataContent();
 
-                multiContent.Add(bytes, "file", model.UploadModule.FileName);
-                HttpResponseMessage response = await client.PostAsync($"/api/data/modules", multiContent);
+                    multiContent.Add(bytes, "file", model.UploadModule.FileName);
+                    response = await client.PostAsync($"/api/data/modules", multiContent);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        ViewBag.ErrorMessage = "Invalid format on file uploaded - Module.";
+                        return View(model);
+                    }
 
-                if (response.IsSuccessStatusCode)
+                }
+                    if (model.UploadStudentModule != null && (model.Year >= 1900 && model.Year <= 2099))
                 {
 
+                    using (var br = new BinaryReader(model.UploadStudentModule.OpenReadStream()))
+                        data = br.ReadBytes((int)model.UploadStudentModule.OpenReadStream().Length);
+
+                    bytes = new ByteArrayContent(data);
+
+
+                    multiContent = new MultipartFormDataContent();
+
+                    multiContent.Add(bytes, "file", model.UploadStudentModule.FileName);
+                    response = await client.PostAsync($"/api/data/students/{model.CampusCode}", multiContent);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        ViewBag.ErrorMessage = "Invalid format on file uploaded - Student Module.";
+                        return View(model);
+                    }
+                }
+                else if (model.UploadStudentModule != null && (model.Year < 1900 || model.Year >2099))
+                {
+                    ViewBag.ErrorMessage = "Please enter a year between 1900-2099";
+                    return View(model);
                 }
 
 
-                using (var br = new BinaryReader(model.UploadStudentModule.OpenReadStream()))
-                    data = br.ReadBytes((int)model.UploadStudentModule.OpenReadStream().Length);
-
-                bytes = new ByteArrayContent(data);
-
-
-                multiContent = new MultipartFormDataContent();
-
-                multiContent.Add(bytes, "file", model.UploadStudentModule.FileName);
-                response = await client.PostAsync($"/api/data/students/{model.CampusCode}", multiContent);
-
-                if (response.IsSuccessStatusCode)
+                    if (model.UploadStaff != null)
                 {
+                    using (var br = new BinaryReader(model.UploadStaff.OpenReadStream()))
+                        data = br.ReadBytes((int)model.UploadStaff.OpenReadStream().Length);
 
+                    bytes = new ByteArrayContent(data);
+
+
+                    multiContent = new MultipartFormDataContent();
+
+                    multiContent.Add(bytes, "file", model.UploadStaff.FileName);
+                    response = await client.PostAsync($"/api/data/staff/{model.CampusCode}/{model.Year}", multiContent);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        ViewBag.ErrorMessage = "Invalid format on file uploaded - Staff.";
+                        return View(model);
+                    }
                 }
-
-
-
-                using (var br = new BinaryReader(model.UploadStaff.OpenReadStream()))
-                    data = br.ReadBytes((int)model.UploadStaff.OpenReadStream().Length);
-
-                bytes = new ByteArrayContent(data);
-
-
-                multiContent = new MultipartFormDataContent();
-
-                multiContent.Add(bytes, "file", model.UploadStaff.FileName);
-                response = await client.PostAsync($"/api/data/staff/{model.CampusCode}/{model.Year}", multiContent);
-
-                if (response.IsSuccessStatusCode)
-                {
-
-                }
-
+               
 
                 return RedirectToAction("Index", "Home");
             }
@@ -391,5 +415,57 @@ namespace WebApplication4.Controllers
             // do something with the above data
             // to do : return something
         }
+
+
+       /* sealed class FileExportCSVMap : ClassMap<FileExportModel>
+        {
+            public FileExportCSVMap()
+            {
+                Map(m => m.module_code).Name("module_code");
+                Map(m => m.mod_full_name).Name("mod_full_name");
+                Map(m => m.academic_year).Name("academic_year");
+                Map(m => m.email).Name("email");
+                Map(m => m.name).Name("name");
+            }
+        }
+        public async Task<FileStreamResult> FileExport(int id)
+        {
+            var client = _factory.CreateClient("ModuleClient");
+
+            HttpResponseMessage response = await client.GetAsync($"/api/modules/{id}");
+            string responseString = response.Content.ReadAsStringAsync().Result;
+            ModuleViewModel model = Newtonsoft.Json.JsonConvert.DeserializeObject<ModuleViewModel>(responseString);
+
+            response = await client.GetAsync($"/api/modules/{id}/students");
+            List<StaffAndStudentModel> studentList = new List<StaffAndStudentModel>();
+            responseString = response.Content.ReadAsStringAsync().Result;
+            studentList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<StaffAndStudentModel>>(responseString);
+
+            List<FileExportModel> fileExport = new List<FileExportModel>();
+            foreach(StaffAndStudentModel student in studentList)
+            {
+                var studentName = student.Surname + ", " + student.Forename;
+                var file = new FileExportModel()
+                {
+                    module_code = model.Code,
+                    mod_full_name = model.Title,
+                    academic_year = model.Year,
+                    email = student.Uid,
+                    name = studentName
+                };
+                fileExport.Add(file);
+            }
+
+            var stream = new MemoryStream();
+            using (var writeFile = new StreamWriter(stream))
+            {
+                var csv = new CsvWriter(writeFile);
+                csv.Configuration.RegisterClassMap<FileExportCSVMap>();
+                csv.WriteRecords(fileExport);
+            }
+            stream.Position = 0;
+
+            return File(stream, "application/octet-stream", $"Exported{model.Code}.csv");
+        }*/
     }
 }

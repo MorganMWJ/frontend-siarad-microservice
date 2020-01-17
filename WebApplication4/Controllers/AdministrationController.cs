@@ -124,7 +124,8 @@ namespace WebApplication4.Controllers
             {
                 Id = user.Id,
                 UserName = user.UserName,
-                Claims = userClaims.Select(c => c.Value).ToList(),
+                Forename = user.Forename,
+                Surname = user.Surname,
                 Roles = userRoles
             };
 
@@ -134,6 +135,7 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public async Task<IActionResult> EditUser(EditUserViewModel model)
         {
+            var client = _factory.CreateClient("ModuleClient");
             var user = await userManager.FindByIdAsync(model.Id);
             if (user == null)
             {
@@ -142,7 +144,23 @@ namespace WebApplication4.Controllers
             }
             else
             {
-                user.UserName = model.UserName;
+                model.UserName = user.UserName; //Model requires the username incase of re-render
+                user.Forename = model.Forename;
+                user.Surname = model.Surname;
+                var studentOrStaffModel = new StaffAndStudentModel()
+                {
+                    Uid = user.UserName,
+                    Forename = user.Forename,
+                    Surname = user.Surname
+                };
+                if (await userManager.IsInRoleAsync(user, "Student"))
+                {
+                    HttpResponseMessage response = await client.PutAsJsonAsync($"/api/students/{user.UserName}", studentOrStaffModel);
+                }
+                if (await userManager.IsInRoleAsync(user, "Staff"))
+                {
+                    HttpResponseMessage response = await client.PutAsJsonAsync($"/api/staff/{user.UserName}", studentOrStaffModel);
+                }
                 var result = await userManager.UpdateAsync(user);
 
                 if (result.Succeeded)
@@ -161,6 +179,7 @@ namespace WebApplication4.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteUser(string id)
         {
+            var client = _factory.CreateClient("ModuleClient");
             var user = await userManager.FindByIdAsync(id);
             if (user == null)
             {
@@ -169,8 +188,15 @@ namespace WebApplication4.Controllers
             }
             else
             {
+                if (await userManager.IsInRoleAsync(user, "Student"))
+                {
+                    HttpResponseMessage response = await client.DeleteAsync($"/api/students/{user.UserName}");
+                }
+                if (await userManager.IsInRoleAsync(user, "Staff"))
+                {
+                    HttpResponseMessage response = await client.DeleteAsync($"/api/staff/{user.UserName}");
+                }
                 var result = await userManager.DeleteAsync(user);
-
                 if (result.Succeeded)
                 {
                     return RedirectToAction("ListUsers");
@@ -183,7 +209,6 @@ namespace WebApplication4.Controllers
             }
             return View("ListUsers");
         }
-
         [HttpPost]
         public async Task<IActionResult> DeleteRole(string id)
         {
