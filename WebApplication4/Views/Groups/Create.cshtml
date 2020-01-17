@@ -22,7 +22,7 @@
                 <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            <input asp-for="ModuleId" type="hidden" value="@Model.ModuleId">
+            <input asp-for="ModuleId" type="hidden" value="@ViewBag.CurrentModule.Id">
 
             <div class="form-group form-check private-check">
                 <label class="form-check-label">

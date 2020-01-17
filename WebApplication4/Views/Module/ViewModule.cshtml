@@ -19,35 +19,63 @@ else
 
     foreach (var group in Model.Groups)
     {
-        <div class="card mb-3">
-            <div class="card-header">
-                <span class="h5 font-weight-bold">Group Name: 
-                    <a class="h5" asp-controller="Message" asp-action="ListMessagesForGroup" asp-route-group_id="@group.Id">@group.Name</a>
-                </span>
-            </div>
-            <div class="card-body">
-                <p>@group.Description</p>
-            </div>
-            <div class="card-footer d-flex justify-content-between" asp-controller="Groups" asp-action="Create" asp-route-id="@group.Id">
-                @if (group.IsPrivate)
-                {
-                    <span class="font-weight-bold">
-                        Private Group (@group.Uid1 &amp; @group.Uid2)
+        @if (group.IsPrivate && (group.Uid1.Equals(User.Identity.Name) || group.Uid2.Equals(User.Identity.Name) || User.IsInRole("Admin")))
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <span class="h5 font-weight-bold">
+                        Group Name:
+                        <a class="h5" asp-controller="Message" asp-action="ListMessagesForGroup" asp-route-group_id="@group.Id">@group.Name</a>
                     </span>
-                }
-                else
-                {
-                    <span class="font-weight-bold">Public Group</span>
-                }
-                <div class="d-flex">
-                    @if (signInManager.IsSignedIn(User) && (User.IsInRole("Admin") || User.IsInRole("Staff")))
+                </div>
+                <div class="card-body">
+                    <p>@group.Description</p>
+                </div>
+                <div class="card-footer d-flex justify-content-between" asp-controller="Groups" asp-action="Create" asp-route-id="@group.Id">
+                    @if (group.IsPrivate)
                     {
-                        <a class="btn btn-info mr-1" asp-controller="Groups" asp-action="Edit" asp-route-id="@group.Id">Edit Group</a>
-                        <a class="btn btn-danger ml-2" asp-controller="Groups" asp-action="Delete" asp-route-id="@group.Id">Delete Group</a>
+                        <span class="font-weight-bold">
+                            Private Group (@group.Uid1 &amp; @group.Uid2)
+                        </span>
                     }
+                    else
+                    {
+                        <span class="font-weight-bold">Public Group</span>
+                    }
+                    <div class="d-flex">
+                        @if (signInManager.IsSignedIn(User) && (User.IsInRole("Admin") || User.IsInRole("Staff")))
+                        {
+                            <a class="btn btn-info mr-1" asp-controller="Groups" asp-action="Edit" asp-route-id="@group.Id">Edit Group</a>
+                            <a class="btn btn-danger ml-2" asp-controller="Groups" asp-action="Delete" asp-route-id="@group.Id">Delete Group</a>
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
+        }
+        else
+        {
+            <div class="card mb-3">
+                <div class="card-header">
+                    <span class="h5 font-weight-bold">
+                        Group Name:
+                        <a class="h5" asp-controller="Message" asp-action="ListMessagesForGroup" asp-route-group_id="@group.Id">@group.Name</a>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p>@group.Description</p>
+                </div>
+                <div class="card-footer d-flex justify-content-between" asp-controller="Groups" asp-action="Create" asp-route-id="@group.Id">                 
+                        <span class="font-weight-bold">Public Group</span>
+                    <div class="d-flex">
+                        @if (signInManager.IsSignedIn(User) && (User.IsInRole("Admin") || User.IsInRole("Staff")))
+                        {
+                            <a class="btn btn-info mr-1" asp-controller="Groups" asp-action="Edit" asp-route-id="@group.Id">Edit Group</a>
+                            <a class="btn btn-danger ml-2" asp-controller="Groups" asp-action="Delete" asp-route-id="@group.Id">Delete Group</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
     }
 
     @if (Model.Groups.Count == 0)

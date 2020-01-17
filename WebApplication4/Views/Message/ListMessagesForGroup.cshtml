@@ -19,7 +19,7 @@ else
         <div class="row">
             <div class="col-sm bg-light border-right-2">
                 <span class="h5">
-                    @Model.Module.Code - @Model.Module.Title
+                    @Model.Module.Code: @Model.Module.Title
                 </span>
             </div>
             <div class="col-sm bg-light border-left-2">
@@ -28,12 +28,33 @@ else
                     Desc: @Model.Description
                 </span>
             </div>
+            </div>
+        <div class="row">
+            @if (Model.IsPrivate)
+            {
+                <div class="col d-flex justify-content-center">
+                    <span class="h5">
+                        This is a private group between @Model.Uid1 and @Model.Uid2.
+                    </span>
+                </div>
+            }
+            else
+            {
+        <div class="col d-flex justify-content-center">
+            <span class="h5">
+                This is a public group.
+            </span>
         </div>
-    </div>
+                    }
+                </div>
+            </div>
 
     <hr />
 
     <div class="container">
+        <div>
+            <a asp-controller="Module" asp-action="ViewModule" asp-route-id="@Model.ModuleId">Back to List</a>
+        </div>
         @foreach (var message in Model.Messages)
         {
             @if (message.IsDeleted == false)
@@ -55,7 +76,7 @@ else
                                 <a class="btn btn-outline-info btn-sm" onclick="toggleEditMessage(@message.Id)">Edit</a>
                             }
                             @if ((signInManager.IsSignedIn(User) &&
-                             (User.IsInRole("Admin") || User.IsInRole("Staff"))) || (signInManager.IsSignedIn(User) && !message.HasReplies && User.Identity.Name.Equals(message.OwnerUid)))
+                            (User.IsInRole("Admin") || User.IsInRole("Staff"))) || (signInManager.IsSignedIn(User) && !message.HasReplies && User.Identity.Name.Equals(message.OwnerUid)))
                             {
                                 <a class="btn btn-outline-danger btn-sm" asp-controller="Message" asp-action="Delete" asp-route-id="@message.Id" asp-route-group_id="@Model.Id">Mark Deleted</a>
                             }
