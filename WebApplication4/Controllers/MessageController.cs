@@ -29,6 +29,17 @@ namespace WebApplication4.Controllers
             group.Module = await _moduleClient.GetModuleAsync(group.ModuleId);
             group.Messages = await _messageClient.GetMessagesAsync(group_id);
             group.Messages.Sort((x, y) => DateTime.Compare(x.TimeCreated, y.TimeCreated));
+
+            if (group.IsPrivate && !User.IsInRole("Admin"))
+            {
+                var userOneValid = group.Uid1.Equals(User.Identity.Name);
+                var userTwoValid = group.Uid2.Equals(User.Identity.Name);
+                if(userOneValid == false && userTwoValid == false)
+                {
+                    return RedirectToAction("AccessDenied", "Account");
+                }
+            }
+
             return View(group);
         }
 

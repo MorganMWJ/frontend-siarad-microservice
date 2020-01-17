@@ -19,6 +19,7 @@ namespace WebApplication4.Controllers
 
         }
 
+        //Get the settings for a user, if there is no settings currently, create those settings and return that.
         [HttpGet]
         public async Task<IActionResult> EditSettings(String id)
         {
@@ -53,6 +54,7 @@ namespace WebApplication4.Controllers
             return View(model);
         }
 
+        //Edit the user settings
         [HttpPost]
         public async Task<IActionResult> EditSettings(NotificationModelViewModel model)
         {

@@ -1,14 +1,16 @@
 ﻿@model IEnumerable<IdentityRole>
-
+@*Sourced from the Webseries guide presented by Kudvenkat, referenced in the Group Report.
+    Modified to better fit our needs*@
 @{ ViewBag.Title = "All Roles";
-    }
+}
 
 <h1>All Roles</h1>
 
 @if (Model.Any())
 {
     <a class="btn btn-primary mb-3" style="width:auto" asp-action="CreateRole" asp-controller="Administration">Add new role</a>
-    foreach(var role in Model) {
+    foreach (var role in Model)
+    {
         <div class="card mb-3">
             <div class="card-header">
                 Role ID: @role.Id
@@ -35,22 +37,22 @@
 }
 else
 {
-<div class="card">
-    <div class="card-header">
-        No roles created yet
-    </div>
-    <div class="card-body">
-        <h5 class="card-title">
-            Use the button below to create a role
-        </h5>
-        <a class="btn btn-primary" style="width:auto" asp-controller="Administration" asp-action="CreateRole">
-            CreateRole
-        </a>
-    </div>
+    <div class="card">
+        <div class="card-header">
+            No roles created yet
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">
+                Use the button below to create a role
+            </h5>
+            <a class="btn btn-primary" style="width:auto" asp-controller="Administration" asp-action="CreateRole">
+                CreateRole
+            </a>
+        </div>
     </div>
 
-    }
+}
 
-@section Scripts{ 
+@section Scripts{
     <script src="~/js/ConfirmDelete.js"></script>
 }

@@ -1,5 +1,6 @@
 ﻿@model IEnumerable<ApplicationUser>
-
+@*Sourced from the Webseries guide presented by Kudvenkat, referenced in the Group Report.
+    Modified to better fit our needs*@
 @{
     ViewBag.Title = "All Users";
 }
@@ -10,7 +11,7 @@
 {
     <a class="btn btn-primary mb-3" style="width:auto" asp-controller="Account" asp-action="Register">
         Add new user
-    </a> 
+    </a>
     foreach (var user in Model)
     {
         <div class="card mb-3">
@@ -54,7 +55,7 @@ else
     </div>
 }
 
-@section Scripts{ 
+@section Scripts{
     <script src="~/js/ConfirmDelete.js"></script>
 }
 

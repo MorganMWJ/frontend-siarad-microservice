@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebApplication4.Models
 {
+    /*Sourced from the Webseries guide presented by Kudvenkat, referenced in the Group Report.*/
     public class UserRolesViewModel
     {
         public string RoleId { get; set; }

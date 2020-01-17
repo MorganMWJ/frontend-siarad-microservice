@@ -17,13 +17,8 @@ namespace WebApplication4.Controllers
 //https://www.youtube.com/watch?v=TzhqymQm5kw
 {
     [Authorize(Roles = "Admin")]
-    //Authorize(Roles="Admin,User")] Either role can access
-
-    /*
-     *  [Authorize(Roles ="Admin")]
-     *   [Authorize(Roles ="User")]
-     *   Both roles are required to access
-     */
+    /* A large section of this controller is either sourced from the Webseries guide presented by Kudvenkat, referenced in the Group Report.
+     Most of these methods have then been given additional functionality to support module registration integration*/
     public class AdministrationController : Controller
     {
         private readonly RoleManager<IdentityRole> roleManager;
@@ -36,12 +31,14 @@ namespace WebApplication4.Controllers
             this.userManager = userManager;
             _factory = factory;
         }
+        //Return the view for CreateRole
         [HttpGet]
         public IActionResult CreateRole()
         {
             return View();
         }
 
+        //Creates a role and adds it to the Identity Server
         [HttpPost]
         public async Task<IActionResult> CreateRole(CreateRoleViewModel model)
         {
@@ -67,6 +64,7 @@ namespace WebApplication4.Controllers
             return View(model);
         }
 
+        //Returns to the view, a list of roles
         [HttpGet]
         public IActionResult ListRoles()
         {
@@ -74,14 +72,15 @@ namespace WebApplication4.Controllers
             return View(roles);
         }
 
+        //Returns to the view, a list of users
         [HttpGet]
         public IActionResult ListUsers()
         {
             var users = userManager.Users;
             return View(users);
         }
-        [HttpGet]
 
+        //Allows for the role details to be editted and updated within the Identity store
         [HttpGet]
         public async Task<IActionResult> EditRole(string id)
         {
@@ -108,6 +107,7 @@ namespace WebApplication4.Controllers
             return View(model);
         }
 
+        //Retrieves the current users details and returns it to the view as a model
         [HttpGet]
         public async Task<IActionResult> EditUser(string id)
         {
@@ -118,7 +118,6 @@ namespace WebApplication4.Controllers
                 return View("NotFound");
             }
 
-            var userClaims = await userManager.GetClaimsAsync(user);
             var userRoles = await userManager.GetRolesAsync(user);
             var model = new EditUserViewModel
             {
@@ -131,7 +130,7 @@ namespace WebApplication4.Controllers
 
             return View(model);
         }
-
+        //Edit a user both on the identity store and the module registration database
         [HttpPost]
         public async Task<IActionResult> EditUser(EditUserViewModel model)
         {
@@ -176,6 +175,7 @@ namespace WebApplication4.Controllers
             return View(model);
         }
 
+        //Delete a user from both the identity store and module registration database
         [HttpPost]
         public async Task<IActionResult> DeleteUser(string id)
         {
@@ -209,6 +209,7 @@ namespace WebApplication4.Controllers
             }
             return View("ListUsers");
         }
+        //Delete a role from the identity store
         [HttpPost]
         public async Task<IActionResult> DeleteRole(string id)
         {
@@ -234,7 +235,7 @@ namespace WebApplication4.Controllers
             }
             return View("ListRoles");
         }
-
+        //Edit a role in the identity store
         [HttpPost]
         public async Task<IActionResult> EditRole(EditRoleViewModel model)
         {
@@ -261,7 +262,7 @@ namespace WebApplication4.Controllers
             }
             return View(model);
         }
-
+        //Retrieve a list of models with users for a specific role
         [HttpGet]
         public async Task<IActionResult> EditUsersInRole(string roleId)
         {
@@ -294,7 +295,8 @@ namespace WebApplication4.Controllers
             }
             return View(model);
         }
-
+        //Update a series of users' roles and persist these changes to the identity store and module registration database
+        //This is viewed from the manage roles page and gives you a list of students to add to that role
         [HttpPost]
         public async Task<IActionResult> EditUsersInRole(List<UserRoleViewModel> model, string roleId)
         {
@@ -361,7 +363,7 @@ namespace WebApplication4.Controllers
             }
             return RedirectToAction("EditRole", new { Id = roleId });
         }
-
+        ////Retrieve a list of models with users for a specific user
         [HttpGet]
         public async Task<IActionResult> ManageUserRoles(string userId)
         {
@@ -395,7 +397,8 @@ namespace WebApplication4.Controllers
             }
             return View(model);
         }
-
+        //Update a series of roles' users and persist these changes to the identity store and module registration database
+        //This is viewed from the manage users page and gives you a list of roles to add to the student
         [HttpPost]
         public async Task<IActionResult> ManageUserRoles(List<UserRolesViewModel> model, string userId)
         {

@@ -23,6 +23,7 @@ namespace WebApplication4.Controllers
             _factory = factory;
 
         }
+        //Returns a view containing a list of modules to be displayed, a student or staff member will only receive their own modules whilst admin will see a list of all modules.
         public async Task<IActionResult> Index()
         {
                 List<ModuleViewModel> moduleList = new List<ModuleViewModel>();

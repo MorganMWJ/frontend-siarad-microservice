@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace WebApplication4.Models
 {
+    /*Sourced from the Webseries guide presented by Kudvenkat, referenced in the Group Report.
+     Modified to better fit our needs*/
     public class LoginViewModel
     {
         [Required]

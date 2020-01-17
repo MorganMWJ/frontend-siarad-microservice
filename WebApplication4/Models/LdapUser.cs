@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace WebApplication4.Models
 {
+    /*No longer in use since LDAP failed*/
     public class LdapUser
     {
         public string Forename { get; set; }

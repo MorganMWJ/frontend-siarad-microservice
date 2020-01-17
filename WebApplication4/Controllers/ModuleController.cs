@@ -19,7 +19,6 @@ using WebApplication4.Services;
 
 namespace WebApplication4.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class ModuleController : Controller
     {
         private readonly RoleManager<IdentityRole> roleManager;
@@ -38,34 +37,70 @@ namespace WebApplication4.Controllers
             _repo = repo;
             _moduleClient = moduleClient;
         }
-        //[AllowAnonymous]
-        //[HttpGet]
-        //public IActionResult ViewModule()
-        //{ 
-        //    return View();
-        //}
 
-        [AllowAnonymous]
+        //Returns the view of the model to the view after authenticating that the user is allowed to view it.
         public async Task<IActionResult> ViewModule(int id)
         {
+            if (!User.IsInRole("Admin"))//If the user is not an admin do
+            {
+                var client = _factory.CreateClient("ModuleClient");
+                HttpResponseMessage response;
+                List<StaffAndStudentModel> staffAndStudentList = new List<StaffAndStudentModel>(); 
+                if (User.IsInRole("Student"))//If student
+                {
+                    response = await client.GetAsync($"/api/modules/{id}/students"); //Get a list of students
+                }
+                else if (User.IsInRole("Staff")) //If staff
+                {
+                    response = await client.GetAsync($"/api/modules/{id}/staff"); //Get a list of staff
+                }
+                else //If other
+                {
+                    response = null; //Create null to catch later
+                }
+                try
+                {
+                    if (response.IsSuccessStatusCode)//If successfully got data
+                    {
+                        string responseString = response.Content.ReadAsStringAsync().Result;
+                        staffAndStudentList = Newtonsoft.Json.JsonConvert.DeserializeObject<List<StaffAndStudentModel>>(responseString);//Deserialise as model
+
+                        var result = staffAndStudentList.Find(e => e.Uid.Equals(User.Identity.Name)); //Try to find the user within the list
+                        if (result == null) //If the user is not there
+                        {
+                            return RedirectToAction("AccessDenied", "Account"); //Access denied
+                        }
+                    }
+                }catch(NullReferenceException e) //Catch from earlier, if other user (No role assigned)
+                {
+                    //This will only ever be called if the user is unauthorised.
+                    return RedirectToAction("AccessDenied", "Account"); //Access denied
+                }
+            }
+
             ModuleViewModel module = await _moduleClient.GetModuleAsync(id);
             List<Group> groupsForModule = await _repo.GroupListAsync(module.Id);
             module.Groups = groupsForModule;
+            //Load the view for that module id
             return View(module);
         }
+        [Authorize(Roles = "Admin")]
+        //Return a list of modules
         public async Task<IActionResult> ListModules()
         {
             List<ModuleViewModel> moduleList = await _moduleClient.GetModuleListAsync();
             return View(moduleList);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpGet]
+        //Get view to create module
         public IActionResult CreateModule()
         {
             return View();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
+        //Create a new module within the module registration database
         public async Task<IActionResult> CreateModule(ModuleViewModel model)
         {
             if (ModelState.IsValid)
@@ -86,14 +121,16 @@ namespace WebApplication4.Controllers
 
             return View(model);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpGet]
+        //Get the view for delete module
         public IActionResult DeleteModule()
         {
             return View();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
+        //Delete a module from the module registration database
         public async Task<IActionResult> DeleteModule(string id)
         {
             var client = _factory.CreateClient("ModuleClient");
@@ -108,8 +145,9 @@ namespace WebApplication4.Controllers
                 return View(response.Content);
             }
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpGet]
+        //Get the view for for a specific module, this includes the list of staff and students registered on that module, and return the model to the view
         public async Task<IActionResult> EditModule(int id)
         {
             var client = _factory.CreateClient("ModuleClient");
@@ -171,7 +209,8 @@ namespace WebApplication4.Controllers
             }
             return View(model);
         }
-
+        [Authorize(Roles = "Admin")]
+        //Get the view to manage the students registered on a selected module, this will also show a list of students currently registered with a checkbox either ticked or not.
         [HttpGet]
         public async Task<IActionResult> ManageStudentsRegistered(int id)
         {
@@ -208,6 +247,8 @@ namespace WebApplication4.Controllers
             }
             return View(model);
         }
+        [Authorize(Roles = "Admin")]
+        //Update the students registered on a specific module and persist it to the module registration database
         [HttpPost]
         public async Task<IActionResult> ManageStudentsRegistered(List<ManageRegisteredStudentsAndStaffModel> model, int id)
         {
@@ -235,6 +276,8 @@ namespace WebApplication4.Controllers
             return RedirectToAction("EditModule", new { Id = id });
         }
 
+        [Authorize(Roles = "Admin")]
+        //Get the view to manage the staff registered on a selected module, this will also show a list of staff currently registered with a checkbox either ticked or not.
         [HttpGet]
         public async Task<IActionResult> ManageStaffRegistered(int id)
         {
@@ -272,6 +315,8 @@ namespace WebApplication4.Controllers
             }
             return View(model);
         }
+        [Authorize(Roles = "Admin")]
+        //Update the staff registered on a specific module and persist it to the module registration database
         [HttpPost]
         public async Task<IActionResult> ManageStaffRegistered(List<ManageRegisteredStudentsAndStaffModel> model, int id)
         {
@@ -298,7 +343,8 @@ namespace WebApplication4.Controllers
 
             return RedirectToAction("EditModule", new { Id = id });
         }
-
+        [Authorize(Roles = "Admin")]
+        //Update a module and persist it to the module registration database.
         [HttpPost]
         public async Task<IActionResult> EditModule(ModuleViewModel model)
         {
@@ -318,13 +364,17 @@ namespace WebApplication4.Controllers
             }
             return View(model);
         }
-
+        [Authorize(Roles = "Admin")]
         public IActionResult FileUpload()
         {
             return View(new FileUploadModel());
         }
 
-        //source https://stackoverflow.com/questions/39397278/post-files-from-asp-net-core-web-api-to-another-asp-net-core-web-api
+        /*Allows for a user to submit files to be uploaded.
+        * Validation is handled within the controller as we allow for any amount of files to be uploaded.
+        * Looked in to custom validation data annotations for the model class (FileUploadModel) but couldn't get it working
+        *source https://stackoverflow.com/questions/39397278/post-files-from-asp-net-core-web-api-to-another-asp-net-core-web-api
+        */
         [HttpPost]
         public async Task<IActionResult> FileUpload(FileUploadModel model)
         {
@@ -412,11 +462,11 @@ namespace WebApplication4.Controllers
                 return RedirectToAction("Index", "Home");
             }
             return View(model);
-            // do something with the above data
-            // to do : return something
         }
 
-
+        /*
+         * The file export functionality contained bugs within it, but I believe the code here is close to completing it.
+         * Used CsvHelper
        /* sealed class FileExportCSVMap : ClassMap<FileExportModel>
         {
             public FileExportCSVMap()
